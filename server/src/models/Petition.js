@@ -32,6 +32,19 @@ const petitionSchema = new mongoose.Schema({
             }
         },
     },
+    goal: {
+        type: Number,
+        required: true,
+    },
+    date: {
+        type: String,
+        required: true,
+        validate(value) {
+            if (!validator.isISO8601(value)) {
+                throw new Error('Not a valid date');
+            }
+        },
+    },
 });
 
 const Petition = mongoose.model('Petition', petitionSchema);

@@ -33,6 +33,9 @@ const userSchema = new mongoose.Schema({
             }
         },
     },
+    bio: {
+        type: String,
+    },
     pfp: {
         data: {
             type: Buffer,
@@ -50,6 +53,10 @@ const userSchema = new mongoose.Schema({
         required: true,
     },
     feed: {
+        type: Array,
+        required: true,
+    },
+    activity: {
         type: Array,
         required: true,
     },

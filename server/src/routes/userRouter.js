@@ -4,6 +4,21 @@ const { auth } = require('../utils/authMiddleware');
 
 const router = express.Router();
 
+router.get('/activity', auth, async (req, res) => {
+    let activity = [];
+    try {
+        activity = req.user.activity;
+    } catch (e) {
+        console.log(e);
+        return res.status(200).send(e.message);
+    }
+
+    return res.status(200).json({
+        success: true,
+        activity,
+    });
+});
+
 router.get('/feed', auth, async (req, res) => {
     let feed = [];
     try {

@@ -69,7 +69,7 @@ router.post('/register', async (req, res) => {
 
     try {
         await User.init();
-        user = new User({ name, email, password, friends: [], friendRequests: [] });
+        user = new User({ name, email, password, friends: [], friendRequests: [], activity: [] });
         await user.save();
         token = await user.generateAuthToken();
     } catch (e) {
