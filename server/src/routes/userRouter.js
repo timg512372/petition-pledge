@@ -62,6 +62,39 @@ router.get('/friendRequests', auth, async (req, res) => {
     });
 });
 
+router.get('/publicProfile', auth, async (req, res) => {
+    const { uid } = req.body;
+    if (!uid) {
+        return res.status(400).json({
+            uid: 'No user ID found',
+        });
+    }
+    let user;
+    try {
+        user = await User.findById(uid);
+        if (!user) {
+            return res.status(400).json({ uid: 'No User Found' });
+        }
+        user = user.toJSON();
+
+        delete user.friendRequests;
+        delete user.feed;
+
+        if (!req.user.friends.includes(uid)) {
+            delete user.activity;
+            delete user.friends;
+        }
+    } catch (e) {
+        console.log(e);
+        return res.status(500).send(e.message);
+    }
+
+    return res.status(200).send({
+        success: true,
+        user,
+    });
+});
+
 router.post('/addFriendRequest', auth, async (req, res) => {
     const { uid } = req.body;
 
