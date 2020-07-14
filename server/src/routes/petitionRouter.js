@@ -20,6 +20,28 @@ router.get('/', async (req, res) => {
     });
 });
 
+router.get('/petition', async (req, res) => {
+    const { id } = req.query;
+
+    if (!id) {
+        return res.status(400).json({
+            id: 'Petition ID Not Found',
+        });
+    }
+
+    try {
+        petition = await Petition.findById(id);
+    } catch (e) {
+        console.log(e.message);
+        return res.status(500).send(e.message);
+    }
+
+    return res.status(200).json({
+        success: true,
+        petition,
+    });
+});
+
 router.post('/newPetition', auth, async (req, res) => {
     const { name, description, url, goal } = req.body;
 

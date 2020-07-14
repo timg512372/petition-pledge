@@ -20,7 +20,7 @@ export default function (state = INITIAL_STATE, action) {
         case types.FORGOT_PASSWORD:
             return { ...state, loading: false, success: 'Sent Recovery Email' };
         case types.CLEAR_AUTH: {
-            return INITIAL_STATE;
+            return { ...state, loading: false, success: '', error: '' };
         }
         default:
             return state;

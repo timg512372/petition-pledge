@@ -63,7 +63,7 @@ router.get('/friendRequests', auth, async (req, res) => {
 });
 
 router.get('/publicProfile', auth, async (req, res) => {
-    const { uid } = req.body;
+    const { uid } = req.query;
     if (!uid) {
         return res.status(400).json({
             uid: 'No user ID found',

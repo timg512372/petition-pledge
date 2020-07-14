@@ -2,12 +2,17 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
-
+import { Ionicons } from '@expo/vector-icons';
 import SignInScreen from '../screens/auth/SignInScreen';
 import NewUserScreen from '../screens/auth/NewUserScreen';
 import TimelineScreen from '../screens/timeline/TimelineScreen';
 import ExplorePetitionScreen from '../screens/petition/ExplorePetitionScreen';
 import PetitionModal from '../screens/petition/PetitionModal';
+
+import ProfileScreen from '../screens/profile/ProfileScreen';
+import InboxScreen from '../screens/profile/InboxScreen';
+import NewPetitionScreen from '../screens/petition/NewPetitionScreen';
+import ProfileModal from '../screens/profile/ProfileModal';
 
 const Auth = createStackNavigator();
 const AuthNavigator = () => {
@@ -23,9 +28,32 @@ const AuthNavigator = () => {
 const User = createBottomTabNavigator();
 const UserNavigator = () => {
     return (
-        <User.Navigator>
-            <User.Screen name="Timeline" component={TimelineScreen} />
-            <User.Screen name="ExplorePetition" component={ExplorePetitionScreen} />
+        <User.Navigator
+            screenOptions={({ route }) => ({
+                tabBarIcon: ({ focused, color, size }) => {
+                    let iconName = icons[route.name];
+                    return (
+                        <Ionicons
+                            name={iconName}
+                            size={route.name == 'Add' ? size * 1.6 : size}
+                            style={{ marginBottom: -5, marginTop: 4 }}
+                            color={color}
+                        />
+                    );
+                },
+            })}
+        >
+            <User.Screen name="Home" component={TimelineScreen} />
+            <User.Screen name="Discover" component={ExplorePetitionScreen} />
+            <User.Screen
+                options={{
+                    tabBarLabel: '',
+                }}
+                name="Add"
+                component={NewPetitionScreen}
+            />
+            <User.Screen name="Inbox" component={InboxScreen} />
+            <User.Screen name="Me" component={ProfileScreen} />
         </User.Navigator>
     );
 };
@@ -35,7 +63,8 @@ const ModalNavigator = () => {
     return (
         <Modal.Navigator headerMode={null} mode="modal">
             <Modal.Screen name="User" component={UserNavigator} />
-            <Modal.Screen name="Petition" component={PetitionModal} />
+            <Modal.Screen name="PetitionModal" component={PetitionModal} />
+            <Modal.Screen name="ProfileModal" component={ProfileModal} />
         </Modal.Navigator>
     );
 };
@@ -50,6 +79,14 @@ const AppNavigator = () => {
             </App.Navigator>
         </NavigationContainer>
     );
+};
+
+const icons = {
+    Home: 'ios-home',
+    Discover: 'ios-search',
+    Inbox: 'ios-mail',
+    Add: 'ios-add-circle-outline',
+    Me: 'ios-contact',
 };
 
 export default AppNavigator;
