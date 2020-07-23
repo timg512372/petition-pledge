@@ -6,7 +6,7 @@ import {
     widthPercentageToDP as vw,
     heightPercentageToDP as vh,
 } from 'react-native-responsive-screen';
-import { registerUser, clearAuth } from '../../redux/actions';
+import { registerUser, clear } from '../../redux/actions';
 
 class NewUserScreen extends Component {
     state = {
@@ -17,7 +17,7 @@ class NewUserScreen extends Component {
     };
 
     componentWillMount() {
-        this.props.clearAuth();
+        this.props.clear();
     }
 
     // componentDidUpdate?
@@ -77,4 +77,4 @@ const mapStateToProps = (state) => {
     return { auth };
 };
 
-export default connect(mapStateToProps, { registerUser, clearAuth })(NewUserScreen);
+export default connect(mapStateToProps, { registerUser, clear })(NewUserScreen);

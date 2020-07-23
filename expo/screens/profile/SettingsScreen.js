@@ -8,11 +8,8 @@ import {
 } from 'react-native-responsive-screen';
 import { sendFriendRequest } from '../../redux/actions';
 
-class ProfileModal extends Component {
+class SettingsScreen extends Component {
     render() {
-        const { user } = this.props.route.params;
-        console.log(user);
-
         return (
             <View
                 style={{
@@ -22,16 +19,8 @@ class ProfileModal extends Component {
                     height: vh(100),
                 }}
             >
-                <Text category="h4"> {user.name} </Text>
-                <Text> {user.description} </Text>
-                <Button
-                    onPress={() => this.props.sendFriendRequest(user._id, this.props.auth.token)}
-                >
-                    Send Friend Request
-                </Button>
-                <Text>{this.props.status.loading ? 'Loading' : null}</Text>
-                <Text>{this.props.status.error ? this.props.status.error : null}</Text>
-                <Text>{this.props.status.success ? this.props.status.success : null}</Text>
+                <Text category="h4"> Settings </Text>
+                <Text> Nothing here yet </Text>
             </View>
         );
     }
@@ -42,4 +31,4 @@ const mapStateToProps = (state) => {
     return { auth, status };
 };
 
-export default connect(mapStateToProps, { sendFriendRequest })(ProfileModal);
+export default connect(mapStateToProps, { sendFriendRequest })(SettingsScreen);

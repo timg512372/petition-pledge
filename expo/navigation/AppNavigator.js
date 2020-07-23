@@ -8,11 +8,11 @@ import NewUserScreen from '../screens/auth/NewUserScreen';
 import TimelineScreen from '../screens/timeline/TimelineScreen';
 import ExplorePetitionScreen from '../screens/petition/ExplorePetitionScreen';
 import PetitionModal from '../screens/petition/PetitionModal';
-
 import ProfileScreen from '../screens/profile/ProfileScreen';
 import InboxScreen from '../screens/profile/InboxScreen';
 import NewPetitionScreen from '../screens/petition/NewPetitionScreen';
 import ProfileModal from '../screens/profile/ProfileModal';
+import TagScreen from '../screens/petition/TagScreen';
 
 const Auth = createStackNavigator();
 const AuthNavigator = () => {
@@ -22,6 +22,17 @@ const AuthNavigator = () => {
             <Auth.Screen name="NewUser" component={NewUserScreen} />
             {/* <Auth.Screen name="ForgetPassword" component={ForgetPasswordScreen} /> */}
         </Auth.Navigator>
+    );
+};
+
+const Discover = createStackNavigator();
+const DiscoverNavigator = () => {
+    return (
+        <Discover.Navigator headerMode={null}>
+            <Discover.Screen name="Tag" component={TagScreen} />
+            <Discover.Screen name="ExplorePetition" component={ExplorePetitionScreen} />
+            {/* <Auth.Screen name="ForgetPassword" component={ForgetPasswordScreen} /> */}
+        </Discover.Navigator>
     );
 };
 
@@ -44,7 +55,7 @@ const UserNavigator = () => {
             })}
         >
             <User.Screen name="Home" component={TimelineScreen} />
-            <User.Screen name="Discover" component={ExplorePetitionScreen} />
+            <User.Screen name="Discover" component={DiscoverNavigator} />
             <User.Screen
                 options={{
                     tabBarLabel: '',

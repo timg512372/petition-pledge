@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
-import { View, ScrollView } from 'react-native';
-import { Text, Input, Button } from '@ui-kitten/components';
+import { View } from 'react-native';
+import { Text, Input, Button, Autocomplete, AutocompleteItem } from '@ui-kitten/components';
 import { connect } from 'react-redux';
 import {
     widthPercentageToDP as vw,
     heightPercentageToDP as vh,
 } from 'react-native-responsive-screen';
 
-import { newPetition } from '../../redux/actions';
+import { newPetition, clear, getTags, newTag } from '../../redux/actions';
+import TagCard from '../../components/TagCard';
 
 class NewPetitionScreen extends Component {
     state = {
@@ -15,6 +16,27 @@ class NewPetitionScreen extends Component {
         description: '',
         num: '',
         url: '',
+        tags: [],
+        includedTags: [],
+        tagsText: '',
+    };
+
+    componentWillMount() {
+        this.props.clear();
+        this.props.getTags();
+    }
+
+    onAddTag = (index) => {
+        if (index === this.props.tag.tags.length) {
+            this.props.newTag(this.state.tagsText, this.props.auth.token);
+        } else if (!this.state.includedTags[index]) {
+            let { includedTags } = this.state;
+            includedTags[index] = true;
+            this.setState({
+                tags: [...this.state.tags, this.props.tag.tags[index]],
+                includedTags: includedTags,
+            });
+        }
     };
 
     render() {
@@ -40,9 +62,42 @@ class NewPetitionScreen extends Component {
                     placeholder="Signatures Required"
                     onChangeText={(num) => this.setState({ num })}
                 />
-                <Text>{this.props.petition.loading ? 'Loading' : null}</Text>
-                <Text>{this.props.petition.error ? this.props.petition.error : null}</Text>
-                <Text>{this.props.petition.success ? this.props.petition.success : null}</Text>
+
+                {this.state.tags.map((tag, i) => (
+                    <TagCard
+                        tag={tag}
+                        key={tag._id}
+                        onPress={() => {
+                            let { tags, includedTags } = this.state;
+                            tags.splice(i, 1);
+                            includedTags[i] = false;
+                            this.setState({ tags, includedTags });
+                        }}
+                        small
+                    />
+                ))}
+                <Autocomplete
+                    placeholder="Select Tags"
+                    onChangeText={(tagsText) => {
+                        this.setState({ tagsText });
+                        this.props.getTags(tagsText);
+                    }}
+                    onSelect={this.onAddTag}
+                >
+                    {this.props.tag.tags
+                        ? this.props.tag.tags.map((tag, i) => (
+                              <AutocompleteItem key={i} title={tag.name} />
+                          ))
+                        : null}
+                    <AutocompleteItem
+                        key={-1}
+                        title={'Create new tag "' + this.state.tagsText + '"'}
+                    />
+                </Autocomplete>
+
+                <Text>{this.props.status.loading ? 'Loading' : null}</Text>
+                <Text>{this.props.status.error ? this.props.status.error : null}</Text>
+                <Text>{this.props.status.success ? this.props.status.success : null}</Text>
                 <Button
                     onPress={() =>
                         this.props.newPetition(
@@ -50,7 +105,8 @@ class NewPetitionScreen extends Component {
                             this.state.description,
                             this.state.url,
                             this.state.num,
-                            this.props.auth.user.token
+                            this.props.auth.token,
+                            this.state.tags
                         )
                     }
                 >
@@ -62,8 +118,8 @@ class NewPetitionScreen extends Component {
 }
 
 const mapStateToProps = (state) => {
-    const { auth, petition } = state;
-    return { auth, petition };
+    const { auth, status, tag } = state;
+    return { auth, status, tag };
 };
 
-export default connect(mapStateToProps, { newPetition })(NewPetitionScreen);
+export default connect(mapStateToProps, { newPetition, clear, getTags, newTag })(NewPetitionScreen);

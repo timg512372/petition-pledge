@@ -1,25 +1,22 @@
 import * as types from '../types';
 
 const INITIAL_STATE = {
-    loading: false,
     timeline: [],
     activity: [],
-    error: '',
-    success: '',
+    tag: [],
+    search: {},
 };
 
 export default function (state = INITIAL_STATE, action) {
     switch (action.type) {
-        case types.SET_ERROR:
-            return { ...state, loading: false, error: action.payload, success: '' };
-        case types.SET_LOADING:
-            return { ...state, loading: action.payload, error: '', success: '' };
-        case types.SET_SUCCESS:
-            return { ...state, loading: false, error: '', success: action.payload };
         case types.GET_TIMELINE:
-            return { ...state, timeline: action.payload, loading: false };
+            return { ...state, timeline: action.payload };
         case types.GET_ACTIVITY:
-            return { ...state, activity: action.payload, loading: false };
+            return { ...state, activity: action.payload };
+        case types.GET_PETITIONS:
+            return { ...state, tag: action.payload };
+        case types.GET_SEARCH:
+            return { ...state, search: action.payload };
         default:
             return state;
     }

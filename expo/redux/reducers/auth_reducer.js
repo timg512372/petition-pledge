@@ -3,6 +3,7 @@ import * as types from '../types';
 const INITIAL_STATE = {
     loading: false,
     user: null,
+    token: null,
     error: '',
     success: '',
 };
@@ -12,7 +13,13 @@ export default function (state = INITIAL_STATE, action) {
         case types.LOGIN_USER:
             return { ...state, loading: true, error: '', success: '' };
         case types.LOGIN_USER_SUCCESS:
-            return { ...state, user: action.payload, error: '', loading: false };
+            return {
+                ...state,
+                user: action.payload.user,
+                token: action.payload.token,
+                error: '',
+                loading: false,
+            };
         case types.LOGIN_USER_ERROR:
             return { ...state, error: action.payload, loading: false };
         case types.UPDATE_USER:

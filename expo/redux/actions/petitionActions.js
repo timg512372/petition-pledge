@@ -11,32 +11,7 @@ export const getTimeline = (token) => {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
-            let promises = response.data.feed.map(async (item) => {
-                let petition = await axios.get(`${SERVER_URL}/api/petition/petition`, {
-                    params: {
-                        id: item.petition,
-                    },
-                });
-
-                let user = await axios.get(`${SERVER_URL}/api/user/publicProfile`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                    params: {
-                        uid: item.user,
-                    },
-                });
-
-                let activity = {
-                    date: item.date,
-                    type: item.type,
-                    petition: petition.data.petition,
-                    user: user.data.user,
-                };
-                return activity;
-            });
-
-            let timeline = await Promise.all(promises);
-
-            return dispatch({ type: types.GET_TIMELINE, payload: timeline });
+            return dispatch({ type: types.GET_TIMELINE, payload: response.data.feed });
         } catch (e) {
             console.log(e.response.data);
             return dispatch({
@@ -47,31 +22,13 @@ export const getTimeline = (token) => {
     };
 };
 
-export const getActivityData = (feed, token) => {
-    console.log('getactivity data');
+export const getActivityData = (token) => {
     return async (dispatch) => {
         try {
-            console.log(feed);
-
-            let promises = feed.map(async (item) => {
-                let petition = await axios.get(`${SERVER_URL}/api/petition/petition`, {
-                    params: {
-                        id: item.petition,
-                    },
-                });
-
-                let activity = {
-                    date: item.date,
-                    type: item.type,
-                    petition: petition.data.petition,
-                    user: item.user,
-                };
-                return activity;
+            const response = await axios.get(`${SERVER_URL}/api/user/activity`, {
+                headers: { Authorization: `Bearer ${token}` },
             });
-
-            let feedData = await Promise.all(promises);
-
-            return dispatch({ type: types.GET_ACTIVITY, payload: feedData });
+            return dispatch({ type: types.GET_ACTIVITY, payload: response.data.activity });
         } catch (e) {
             console.log(e.response.data);
             return dispatch({
@@ -82,15 +39,85 @@ export const getActivityData = (feed, token) => {
     };
 };
 
-export const signPetition = (petitionId, token) => {};
+export const getPetitions = (tags) => {
+    return async (dispatch) => {
+        dispatch({ type: types.SET_LOADING, payload: true });
 
-export const newPetition = (name, description, url, goal, token) => {
+        try {
+            const response = await axios.get(`${SERVER_URL}/api/petition/`, { params: { tags } });
+            return dispatch({ type: types.GET_PETITIONS, payload: response.data.petitions });
+        } catch (e) {
+            console.log(e.response.data);
+            return dispatch({
+                type: types.SET_ERROR,
+                payload: processError(e.response.data),
+            });
+        }
+    };
+};
+
+export const search = (query, token) => {
     return async (dispatch) => {
         dispatch({ type: types.SET_LOADING, payload: true });
         try {
+            const petitionSearch = await axios.get(`${SERVER_URL}/api/petition/`, {
+                params: { query },
+            });
+
+            const userSearch = await axios.get(`${SERVER_URL}/api/user/`, {
+                params: { query },
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            console.log('searched');
+
+            return dispatch({
+                type: types.GET_SEARCH,
+                payload: { petitions: petitionSearch.data.petitions, users: userSearch.data.users },
+            });
+        } catch (e) {
+            console.log(e.response.data);
+            return dispatch({
+                type: types.SET_ERROR,
+                payload: processError(e.response.data),
+            });
+        }
+    };
+};
+
+export const signPetition = (petitionId, token) => {
+    return async (dispatch) => {
+        dispatch({ type: types.SET_LOADING, payload: true });
+        console.log(token);
+        try {
+            await axios.post(
+                `${SERVER_URL}/api/petition/signPetition`,
+                { id: petitionId },
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+
+            dispatch({ type: types.SET_SUCCESS, payload: 'Successfully Signed Petition' });
+        } catch (e) {
+            console.log(e.response.data);
+            return dispatch({
+                type: types.SET_ERROR,
+                payload: processError(e.response.data),
+            });
+        }
+    };
+};
+
+export const newPetition = (name, description, url, goal, token, tags) => {
+    return async (dispatch) => {
+        dispatch({ type: types.SET_LOADING, payload: true });
+
+        let trimmedTags = tags.map((tag) => tag.name);
+        try {
             await axios.post(
                 `${SERVER_URL}/api/petition/newPetition`,
-                { name, description, url, goal },
+                { name, description, url, goal, tags: trimmedTags },
                 {
                     headers: { Authorization: `Bearer ${token}` },
                 }

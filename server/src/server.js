@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const authRouter = require('./routes/authRouter');
 const petitionRouter = require('./routes/petitionRouter');
 const userRouter = require('./routes/userRouter');
+const tagRouter = require('./routes/tagRouter');
 
 const port = process.env.PORT ? process.env.PORT : 2000;
 
@@ -25,6 +26,7 @@ app.use(bodyParser.json());
 app.use('/api/auth/', authRouter);
 app.use('/api/petition/', petitionRouter);
 app.use('/api/user/', userRouter);
+app.use('/api/tag/', tagRouter);
 
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);

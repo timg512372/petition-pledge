@@ -43,8 +43,8 @@ export const registerUser = (name, email, password, cpassword) => {
     };
 };
 
-export const clearAuth = () => {
+export const clear = () => {
     return {
-        type: types.CLEAR_AUTH,
+        type: types.CLEAR,
     };
 };

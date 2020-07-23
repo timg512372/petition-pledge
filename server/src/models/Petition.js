@@ -1,18 +1,18 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const validator = require('validator');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const mongoose_fuzzy_searching = require('mongoose-fuzzy-searching');
 
 const petitionSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
-        trim: true,
+        // text: true,
     },
     description: {
         type: String,
         required: true,
+        // text: true,
     },
     signers: {
         type: Array,
@@ -45,6 +45,18 @@ const petitionSchema = new mongoose.Schema({
             }
         },
     },
+    tags: {
+        type: Array,
+        required: true,
+    },
+});
+
+petitionSchema.plugin(mongoose_fuzzy_searching, {
+    fields: [
+        { name: 'name', weight: 3 },
+        { name: 'description', weight: 1 },
+        // { name: 'tags', weight: 2 },
+    ],
 });
 
 const Petition = mongoose.model('Petition', petitionSchema);

@@ -2,13 +2,25 @@ const express = require('express');
 const Petition = require('../models/Petition');
 const { auth } = require('../utils/authMiddleware');
 const User = require('../models/User');
+const Tag = require('../models/Tag');
 
 const router = express.Router();
 
 router.get('/', async (req, res) => {
+    const { id, query, tags } = req.query;
+
     let petitions = [];
+
     try {
-        petitions = await Petition.find();
+        if (id) {
+            petitions[0] = await Petition.findById(id);
+        } else if (query) {
+            petitions = await Petition.fuzzySearch(query);
+        } else if (tags) {
+            petitions = await Petition.find({ tags });
+        } else {
+            petitions = await Petition.find();
+        }
     } catch (e) {
         console.log(e.message);
         return res.status(500).send(e.message);
@@ -20,30 +32,8 @@ router.get('/', async (req, res) => {
     });
 });
 
-router.get('/petition', async (req, res) => {
-    const { id } = req.query;
-
-    if (!id) {
-        return res.status(400).json({
-            id: 'Petition ID Not Found',
-        });
-    }
-
-    try {
-        petition = await Petition.findById(id);
-    } catch (e) {
-        console.log(e.message);
-        return res.status(500).send(e.message);
-    }
-
-    return res.status(200).json({
-        success: true,
-        petition,
-    });
-});
-
 router.post('/newPetition', auth, async (req, res) => {
-    const { name, description, url, goal } = req.body;
+    const { name, description, url, goal, tags } = req.body;
 
     if (!name) {
         return res.status(400).json({
@@ -73,8 +63,19 @@ router.post('/newPetition', auth, async (req, res) => {
             signers: [],
             creator: req.user._id,
             date: date.toISOString(),
+            tags: tags ? tags : [],
         });
         await newPetition.save();
+
+        if (tags) {
+            let promises = tags.map(async (name) => {
+                let tag = await Tag.findOne({ name });
+                tag.usage = tag.usage + 1;
+                await tag.save();
+            });
+
+            await Promise.all(promises);
+        }
 
         let promises = await req.user.friends.map(async (uid) => {
             let user = await User.findById(uid);
@@ -101,7 +102,7 @@ router.post('/newPetition', auth, async (req, res) => {
         });
         await req.user.save();
     } catch (e) {
-        console.log(e.message);
+        console.log(e);
         return res.status(500).send(e.message);
     }
 

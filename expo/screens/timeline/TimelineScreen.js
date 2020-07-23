@@ -12,7 +12,7 @@ import EventCard from '../../components/EventCard';
 
 class Timeline extends Component {
     componentWillMount() {
-        this.props.getTimeline(this.props.auth.user.token);
+        this.props.getTimeline(this.props.auth.token);
     }
 
     render() {
@@ -26,7 +26,7 @@ class Timeline extends Component {
                 }}
             >
                 <Text category="h4"> Your Timeline </Text>
-                <Button onPress={() => this.props.getTimeline(this.props.auth.user.token)}>
+                <Button onPress={() => this.props.getTimeline(this.props.auth.token)}>
                     {' '}
                     Refresh{' '}
                 </Button>

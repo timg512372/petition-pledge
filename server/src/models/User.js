@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const mongoose_fuzzy_searching = require('mongoose-fuzzy-searching');
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -101,13 +102,34 @@ userSchema.methods.toJSON = function () {
     return user;
 };
 
-userSchema.pre('save', async function (next) {
-    const user = this;
+userSchema.methods.publicProfile = function (requester) {
+    const user = this.toJSON();
 
-    if (user.isModified('password')) {
-        user.password = await bcrypt.hash(user.password, 8);
+    delete user.friendRequests;
+    delete user.feed;
+
+    if (!requester.friends.includes(user._id)) {
+        delete user.activity;
+        delete user.friends;
     }
-    next();
+
+    return user;
+};
+
+userSchema.plugin(mongoose_fuzzy_searching, {
+    fields: [
+        { name: 'name', weight: 3 },
+        { name: 'bio', weight: 1 },
+    ],
+    middlewares: {
+        preSave: async function () {
+            const user = this;
+
+            if (user.isModified('password')) {
+                user.password = await bcrypt.hash(user.password, 8);
+            }
+        },
+    },
 });
 
 const User = mongoose.model('User', userSchema);

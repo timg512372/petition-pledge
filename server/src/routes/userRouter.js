@@ -1,13 +1,79 @@
 const express = require('express');
 const User = require('../models/User');
+const Petition = require('../models/Petition');
 const { auth } = require('../utils/authMiddleware');
 
 const router = express.Router();
 
+router.get('/publicProfile', auth, async (req, res) => {
+    const { uid } = req.query;
+    if (!uid) {
+        return res.status(400).json({
+            uid: 'No user ID found',
+        });
+    }
+    let user;
+    try {
+        user = await User.findById(uid);
+        if (!user) {
+            return res.status(400).json({ uid: 'No User Found' });
+        }
+        user = user.publicProfile(req.user);
+    } catch (e) {
+        console.log(e);
+        return res.status(500).send(e.message);
+    }
+
+    return res.status(200).send({
+        success: true,
+        user,
+    });
+});
+
+router.get('/', auth, async (req, res) => {
+    const { uid, query } = req.query;
+
+    let user = [];
+    try {
+        if (uid) {
+            user = await User.findById(uid);
+            user = user.publicProfile(req.user);
+        } else if (query) {
+            user = await User.fuzzySearch(query);
+            user = user.map((element) => element.publicProfile(req.user));
+        }
+    } catch (e) {
+        console.log(e);
+        return res.status(500).send(e.message);
+    }
+
+    return res.status(200).send({
+        success: true,
+        users: user,
+    });
+});
+
 router.get('/activity', auth, async (req, res) => {
     let activity = [];
     try {
-        activity = req.user.activity;
+        let promises = req.user.activity.reverse().map(async (item) => {
+            let petition = await Petition.findById(item.petition);
+
+            user = await User.findById(item.user);
+            user = user.publicProfile(req.user);
+
+            let date = new Date(item.date);
+
+            let activity = {
+                date: date.toDateString(),
+                type: item.type,
+                petition,
+                user,
+            };
+            return activity;
+        });
+
+        activity = await Promise.all(promises);
     } catch (e) {
         console.log(e);
         return res.status(200).send(e.message);
@@ -22,7 +88,24 @@ router.get('/activity', auth, async (req, res) => {
 router.get('/feed', auth, async (req, res) => {
     let feed = [];
     try {
-        feed = req.user.feed;
+        let promises = req.user.feed.map(async (item) => {
+            let petition = await Petition.findById(item.petition);
+
+            user = await User.findById(item.user);
+            user = user.publicProfile(req.user);
+
+            let date = new Date(item.date);
+
+            let activity = {
+                date: date.toDateString(),
+                type: item.type,
+                petition,
+                user,
+            };
+            return activity;
+        });
+
+        feed = await Promise.all(promises);
     } catch (e) {
         console.log(e);
         return res.status(200).send(e.message);
@@ -59,39 +142,6 @@ router.get('/friendRequests', auth, async (req, res) => {
     return res.status(200).json({
         success: true,
         friendRequests,
-    });
-});
-
-router.get('/publicProfile', auth, async (req, res) => {
-    const { uid } = req.query;
-    if (!uid) {
-        return res.status(400).json({
-            uid: 'No user ID found',
-        });
-    }
-    let user;
-    try {
-        user = await User.findById(uid);
-        if (!user) {
-            return res.status(400).json({ uid: 'No User Found' });
-        }
-        user = user.toJSON();
-
-        delete user.friendRequests;
-        delete user.feed;
-
-        if (!req.user.friends.includes(uid)) {
-            delete user.activity;
-            delete user.friends;
-        }
-    } catch (e) {
-        console.log(e);
-        return res.status(500).send(e.message);
-    }
-
-    return res.status(200).send({
-        success: true,
-        user,
     });
 });
 

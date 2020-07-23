@@ -7,7 +7,7 @@ import {
     heightPercentageToDP as vh,
 } from 'react-native-responsive-screen';
 
-import { loginUser, clearAuth } from '../../redux/actions';
+import { loginUser, clear } from '../../redux/actions';
 
 class SignInScreen extends Component {
     state = {
@@ -16,7 +16,7 @@ class SignInScreen extends Component {
     };
 
     componentWillMount() {
-        this.props.clearAuth();
+        this.props.clear();
     }
 
     componentWillReceiveProps(nextProps) {
@@ -74,4 +74,4 @@ const mapStateToProps = (state) => {
     return { auth };
 };
 
-export default connect(mapStateToProps, { loginUser, clearAuth })(SignInScreen);
+export default connect(mapStateToProps, { loginUser, clear })(SignInScreen);

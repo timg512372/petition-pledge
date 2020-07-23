@@ -30,15 +30,16 @@ const EventCard = (props) => {
                 }}
             >
                 <Text>
-                    {props.person.name} {props.type == 'CREATE_PETITION' ? 'created' : 'signed'}
+                    {props.person ? props.person.name : 'Loading'}{' '}
+                    {props.type == 'CREATE_PETITION' ? 'created' : 'signed'}
                 </Text>
                 <Text>{props.date}</Text>
             </View>
             <Text category="h5" style={{ marginBottom: vw(1) }}>
-                {props.petition.name ? props.petition.name : 'Loading'}
+                {props.petition ? props.petition.name : 'Loading'}
             </Text>
             {/* <Image source={PETITION} style={{ width: 488 / 3, height: 488 / 3 }} /> */}
-            {props.petition.signers ? (
+            {props.petition ? (
                 <ProgressBar current={props.petition.signers.length} goal={props.petition.goal} />
             ) : null}
         </TouchableOpacity>

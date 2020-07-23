@@ -9,7 +9,6 @@ import {
     heightPercentageToDP as vh,
 } from 'react-native-responsive-screen';
 
-import PetitionCard from '../../components/PetitionCard';
 import { signPetition } from '../../redux/actions';
 
 class PetitionModal extends Component {
@@ -39,15 +38,22 @@ class PetitionModal extends Component {
                 {petition.signers.map((signer) => {
                     return <Text>{signer}</Text>;
                 })}
-                <Button>Sign This Petition</Button>
+                <Button
+                    onPress={() => this.props.signPetition(petition._id, this.props.auth.token)}
+                >
+                    Sign This Petition
+                </Button>
+                <Text>{this.props.status.loading ? 'Loading' : null}</Text>
+                <Text>{this.props.status.error ? this.props.status.error : null}</Text>
+                <Text>{this.props.status.success ? this.props.status.success : null}</Text>
             </View>
         );
     }
 }
 
 const mapStateToProps = (state) => {
-    const { auth } = state;
-    return { auth };
+    const { auth, status } = state;
+    return { auth, status };
 };
 
 export default connect(mapStateToProps, { signPetition })(PetitionModal);

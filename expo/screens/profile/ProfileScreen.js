@@ -13,12 +13,11 @@ import { getActivityData } from '../../redux/actions';
 
 class ProfileScreen extends Component {
     componentDidMount() {
-        console.log('componentdidmount');
-        this.props.getActivityData(this.props.auth.user.user.activity, this.props.auth.user.token);
+        this.props.getActivityData(this.props.auth.token);
     }
 
     render() {
-        const { user } = this.props.auth.user;
+        const { user } = this.props.auth;
         const { activity } = this.props.petition;
         console.log(user);
         return (
@@ -41,7 +40,7 @@ class ProfileScreen extends Component {
                     <Ionicons
                         name="ios-contact"
                         size={vw(7)}
-                        onPress={() => this.componentWillMount()}
+                        onPress={() => this.componentDidMount()}
                     />
                     <Text category="h4"> {user.name} </Text>
                     <Ionicons name="ios-settings" size={vw(7)} />
@@ -49,20 +48,19 @@ class ProfileScreen extends Component {
 
                 <ScrollView>
                     {activity
-                        ? activity.map((item) => (
-                              <>
-                                  <EventCard
-                                      person={item.user}
-                                      petition={item.petition}
-                                      type={item.type}
-                                      date={item.date}
-                                      onPress={() =>
-                                          this.props.navigation.navigate('PetitionModal', {
-                                              petition: item.petition,
-                                          })
-                                      }
-                                  />
-                              </>
+                        ? activity.map((item, i) => (
+                              <EventCard
+                                  person={item.user}
+                                  petition={item.petition}
+                                  type={item.type}
+                                  date={item.date}
+                                  onPress={() =>
+                                      this.props.navigation.navigate('PetitionModal', {
+                                          petition: item.petition,
+                                      })
+                                  }
+                                  key={i}
+                              />
                           ))
                         : null}
                 </ScrollView>
