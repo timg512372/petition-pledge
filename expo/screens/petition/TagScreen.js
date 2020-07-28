@@ -61,7 +61,7 @@ class TagScreen extends Component {
         return (
             <View style={{ alignItems: 'center' }}>
                 <Text category="h5"> Searched Users </Text>
-                {this.props.petition.search.users
+                {this.props.petition.search.users && this.props.petition.search.users[0]
                     ? this.props.petition.search.users.map((user, i) => (
                           <UserCard
                               user={user}

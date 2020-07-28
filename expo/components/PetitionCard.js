@@ -16,7 +16,7 @@ const PetitionCard = (props) => {
                 style={{ width: vw(35), margin: 5, flexDirection: props.search ? 'row' : 'column' }}
             >
                 <Image
-                    source={PETITION}
+                    source={petition.picture ? { uri: petition.picture } : PETITION}
                     style={{
                         width: !props.search ? vw(30) : vw(10),
                         height: !props.search ? vw(30) : vw(10),

@@ -1,17 +1,21 @@
 import React, { Component } from 'react';
-import { View, ScrollView, TouchableOpacity } from 'react-native';
-import { Text, Input, Button } from '@ui-kitten/components';
+import { View, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { Text, Button } from '@ui-kitten/components';
 import { connect } from 'react-redux';
 import * as Linking from 'expo-linking';
-
 import {
     widthPercentageToDP as vw,
     heightPercentageToDP as vh,
 } from 'react-native-responsive-screen';
 
-import { signPetition } from '../../redux/actions';
+import { signPetition, getSelectedUser } from '../../redux/actions';
+import UserCard from '../../components/UserCard';
 
 class PetitionModal extends Component {
+    componentDidMount() {
+        this.props.getSelectedUser(this.props.route.params.petition.creator, this.props.auth.token);
+    }
+
     render() {
         const { petition } = this.props.route.params;
         console.log(petition);
@@ -25,10 +29,21 @@ class PetitionModal extends Component {
                 }}
             >
                 <Text category="h4">{petition.name} </Text>
-                <Text category="h6">By: {petition.creator}</Text>
+                <UserCard
+                    user={this.props.petition.selectedUser}
+                    onPress={() =>
+                        this.props.navigation.navigate('ProfileModal', {
+                            user: this.props.petition.selectedUser,
+                        })
+                    }
+                />
                 <Text category="h6">Description</Text>
                 <Text>{petition.description}</Text>
-                <TouchableOpacity onPress={() => Linking.openURL(petition.url)}>
+                <TouchableOpacity
+                    onPress={() =>
+                        Linking.openURL(petition.url).catch(Alert.alert('Unable to open link'))
+                    }
+                >
                     <Text category="h6" style={{ color: 'blue' }}>
                         Visit Petition{' '}
                     </Text>
@@ -52,8 +67,8 @@ class PetitionModal extends Component {
 }
 
 const mapStateToProps = (state) => {
-    const { auth, status } = state;
-    return { auth, status };
+    const { auth, status, petition } = state;
+    return { auth, status, petition };
 };
 
-export default connect(mapStateToProps, { signPetition })(PetitionModal);
+export default connect(mapStateToProps, { signPetition, getSelectedUser })(PetitionModal);

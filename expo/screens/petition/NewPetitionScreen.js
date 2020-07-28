@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
-import { View } from 'react-native';
+import { View, Image } from 'react-native';
 import { Text, Input, Button, Autocomplete, AutocompleteItem } from '@ui-kitten/components';
 import { connect } from 'react-redux';
+import * as ImagePicker from 'expo-image-picker';
+import Constants from 'expo-constants';
+import * as Permissions from 'expo-permissions';
 import {
     widthPercentageToDP as vw,
     heightPercentageToDP as vh,
@@ -19,12 +22,41 @@ class NewPetitionScreen extends Component {
         tags: [],
         includedTags: [],
         tagsText: '',
+        image: '',
     };
 
-    componentWillMount() {
+    componentDidMount() {
         this.props.clear();
         this.props.getTags();
+        this.getPermissionAsync();
     }
+
+    getPermissionAsync = async () => {
+        if (Constants.platform.ios) {
+            const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+            if (status !== 'granted') {
+                alert('Sorry, we need camera roll permissions to make this work!');
+            }
+        }
+    };
+
+    pickImage = async () => {
+        try {
+            let result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.All,
+                allowsEditing: true,
+                aspect: [4, 3],
+                quality: 1,
+            });
+            if (!result.cancelled) {
+                this.setState({ image: result });
+            }
+
+            console.log(result);
+        } catch (E) {
+            console.log(E);
+        }
+    };
 
     onAddTag = (index) => {
         if (index === this.props.tag.tags.length) {
@@ -40,6 +72,7 @@ class NewPetitionScreen extends Component {
     };
 
     render() {
+        console.log(this.state.image);
         return (
             <View
                 style={{
@@ -95,6 +128,9 @@ class NewPetitionScreen extends Component {
                     />
                 </Autocomplete>
 
+                <Button onPress={this.pickImage}>Choose an image</Button>
+                <Image source={{ uri: this.state.image.uri }} style={{ width: 200, height: 200 }} />
+
                 <Text>{this.props.status.loading ? 'Loading' : null}</Text>
                 <Text>{this.props.status.error ? this.props.status.error : null}</Text>
                 <Text>{this.props.status.success ? this.props.status.success : null}</Text>
@@ -106,7 +142,8 @@ class NewPetitionScreen extends Component {
                             this.state.url,
                             this.state.num,
                             this.props.auth.token,
-                            this.state.tags
+                            this.state.tags,
+                            this.state.image
                         )
                     }
                 >

@@ -11,7 +11,7 @@ import { getTimeline } from '../../redux/actions';
 import EventCard from '../../components/EventCard';
 
 class Timeline extends Component {
-    componentWillMount() {
+    componentDidMount() {
         this.props.getTimeline(this.props.auth.token);
     }
 
@@ -32,7 +32,7 @@ class Timeline extends Component {
                 </Button>
                 <ScrollView>
                     {this.props.petition.timeline
-                        ? this.props.petition.timeline.map((item) => (
+                        ? this.props.petition.timeline.map((item, i) => (
                               <>
                                   <EventCard
                                       person={item.user}
@@ -44,6 +44,7 @@ class Timeline extends Component {
                                               petition: item.petition,
                                           })
                                       }
+                                      key={i}
                                   />
                               </>
                           ))

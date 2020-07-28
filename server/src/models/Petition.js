@@ -49,6 +49,9 @@ const petitionSchema = new mongoose.Schema({
         type: Array,
         required: true,
     },
+    picture: {
+        type: String,
+    },
 });
 
 petitionSchema.plugin(mongoose_fuzzy_searching, {

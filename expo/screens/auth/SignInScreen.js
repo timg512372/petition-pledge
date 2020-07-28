@@ -26,7 +26,6 @@ class SignInScreen extends Component {
     }
 
     render() {
-        console.log(this.props.auth);
         return (
             <View style={{ width: vw(100), padding: vw(10), alignItems: 'center' }}>
                 <Text category="h1" style={{ marginVertical: vh(10) }}>

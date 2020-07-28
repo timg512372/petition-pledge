@@ -7,8 +7,6 @@ const INITIAL_STATE = {
 };
 
 export default function (state = INITIAL_STATE, action) {
-    console.log(action.type);
-
     switch (action.type) {
         case types.SET_ERROR:
             return { ...state, loading: false, error: action.payload, success: '' };
@@ -20,6 +18,8 @@ export default function (state = INITIAL_STATE, action) {
         case types.GET_TIMELINE:
         case types.GET_ACTIVITY:
         case types.GET_PETITIONS:
+        case types.GET_SELECTED_PROFILE:
+        case types.GET_SELECTED_ACTIVITY:
         case types.GET_SEARCH:
             return INITIAL_STATE;
 

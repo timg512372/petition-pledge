@@ -5,6 +5,8 @@ const INITIAL_STATE = {
     activity: [],
     tag: [],
     search: {},
+    selectedUser: {},
+    selectedActivity: {},
 };
 
 export default function (state = INITIAL_STATE, action) {
@@ -17,6 +19,10 @@ export default function (state = INITIAL_STATE, action) {
             return { ...state, tag: action.payload };
         case types.GET_SEARCH:
             return { ...state, search: action.payload };
+        case types.GET_SELECTED_PROFILE:
+            return { ...state, selectedUser: action.payload };
+        case types.GET_SELECTED_ACTIVITY:
+            return { ...state, selectedActivity: action.payload };
         default:
             return state;
     }

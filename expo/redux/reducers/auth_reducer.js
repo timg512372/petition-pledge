@@ -22,6 +22,8 @@ export default function (state = INITIAL_STATE, action) {
             };
         case types.LOGIN_USER_ERROR:
             return { ...state, error: action.payload, loading: false };
+        case types.LOGOUT_USER:
+            return INITIAL_STATE;
         case types.UPDATE_USER:
             return { ...state, loading: false, user: action.payload };
         case types.FORGOT_PASSWORD:

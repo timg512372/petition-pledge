@@ -20,6 +20,11 @@ class ProfileScreen extends Component {
         const { user } = this.props.auth;
         const { activity } = this.props.petition;
         console.log(user);
+
+        if (!user) {
+            this.props.navigation.navigate('Auth');
+            return null;
+        }
         return (
             <View
                 style={{
@@ -40,11 +45,17 @@ class ProfileScreen extends Component {
                     <Ionicons
                         name="ios-contact"
                         size={vw(7)}
-                        onPress={() => this.componentDidMount()}
+                        onPress={() => this.props.navigation.navigate('Friends')}
                     />
                     <Text category="h4"> {user.name} </Text>
-                    <Ionicons name="ios-settings" size={vw(7)} />
+                    <Ionicons
+                        name="ios-settings"
+                        size={vw(7)}
+                        onPress={() => this.props.navigation.navigate('Settings')}
+                    />
                 </View>
+
+                <Text category="h6">{this.props.auth.user.bio}</Text>
 
                 <ScrollView>
                     {activity

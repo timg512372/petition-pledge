@@ -1,34 +1,22 @@
 const express = require('express');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 const User = require('../models/User');
 const Petition = require('../models/Petition');
-const { auth } = require('../utils/authMiddleware');
-
+const { auth, getImageKit } = require('../utils/authMiddleware');
 const router = express.Router();
 
-router.get('/publicProfile', auth, async (req, res) => {
-    const { uid } = req.query;
-    if (!uid) {
-        return res.status(400).json({
-            uid: 'No user ID found',
-        });
-    }
-    let user;
-    try {
-        user = await User.findById(uid);
-        if (!user) {
-            return res.status(400).json({ uid: 'No User Found' });
-        }
-        user = user.publicProfile(req.user);
-    } catch (e) {
-        console.log(e);
-        return res.status(500).send(e.message);
-    }
-
-    return res.status(200).send({
-        success: true,
-        user,
-    });
+const storage = multer.diskStorage({
+    destination(req, file, callback) {
+        callback(null, path.join(__dirname, '../../uploads/'));
+    },
+    filename(req, file, callback) {
+        callback(null, `${file.fieldname}_${Date.now()}_${file.originalname}`);
+    },
 });
+
+upload = multer({ storage, limits: { fieldSize: 16 * 1024 * 1024 } });
 
 router.get('/', auth, async (req, res) => {
     const { uid, query } = req.query;
@@ -41,6 +29,8 @@ router.get('/', auth, async (req, res) => {
         } else if (query) {
             user = await User.fuzzySearch(query);
             user = user.map((element) => element.publicProfile(req.user));
+        } else {
+            user = req.user;
         }
     } catch (e) {
         console.log(e);
@@ -54,9 +44,18 @@ router.get('/', auth, async (req, res) => {
 });
 
 router.get('/activity', auth, async (req, res) => {
+    const { uid } = req.query;
+
     let activity = [];
     try {
-        let promises = req.user.activity.reverse().map(async (item) => {
+        let structure = req.user.activity;
+        if (uid) {
+            user = await User.findById(uid);
+            user = user.publicProfile(req.user);
+            structure = user.activity ? user.activity : [];
+        }
+
+        let promises = structure.reverse().map(async (item) => {
             let petition = await Petition.findById(item.petition);
 
             user = await User.findById(item.user);
@@ -120,7 +119,13 @@ router.get('/feed', auth, async (req, res) => {
 router.get('/friends', auth, async (req, res) => {
     let friends = [];
     try {
-        friends = req.user.friends;
+        let promises = req.user.friends.map(async (friend) => {
+            let user = await User.findById(friend);
+            user = user.publicProfile(req.user);
+            return user;
+        });
+
+        friends = await Promise.all(promises);
     } catch (e) {
         console.log(e);
         return res.status(200).send(e.message);
@@ -134,7 +139,13 @@ router.get('/friends', auth, async (req, res) => {
 router.get('/friendRequests', auth, async (req, res) => {
     let friendRequests = [];
     try {
-        friendRequests = req.user.friendRequests;
+        let promises = req.user.friendRequests.map(async (request) => {
+            let user = await User.findById(request);
+            user = user.publicProfile(req.user);
+            return user;
+        });
+
+        friendRequests = await Promise.all(promises);
     } catch (e) {
         console.log(e);
         return res.status(200).send(e.message);
@@ -172,6 +183,27 @@ router.post('/addFriendRequest', auth, async (req, res) => {
     });
 });
 
+router.post('/removeFriendRequest', auth, async (req, res) => {
+    const { uid } = req.body;
+    if (!uid) {
+        return res.status(400).json({
+            uid: 'No user ID found',
+        });
+    }
+
+    try {
+        req.user.friendRequests.remove(uid);
+        await req.user.save();
+    } catch (e) {
+        console.log(e);
+        return res.status(500).send(e.message);
+    }
+
+    return res.status(200).send({
+        success: true,
+    });
+});
+
 router.post('/addFriend', auth, async (req, res) => {
     const { uid } = req.body;
 
@@ -192,6 +224,55 @@ router.post('/addFriend', auth, async (req, res) => {
 
         req.user.friends.addToSet(uid);
         req.user.friendRequests.remove(uid);
+        await req.user.save();
+    } catch (e) {
+        console.log(e);
+        return res.status(500).send(e.message);
+    }
+
+    return res.status(200).send({
+        success: true,
+    });
+});
+
+router.post('/changeProfilePicture', upload.any('fileData'), auth, async (req, res) => {
+    if (req.body.type !== 'image') {
+        return res.status(400).json({
+            type: 'File must be an image',
+        });
+    }
+
+    try {
+        const imageKit = getImageKit();
+        const result = await imageKit.upload({
+            file: fs.readFileSync(req.files[0].path),
+            fileName:
+                req.body.name != 'undefined' ? req.body.name : `${req.user._id}-${Date.now()}`,
+        });
+
+        req.user.pfp = result.url;
+        await req.user.save();
+    } catch (e) {
+        console.log(e);
+        return res.status(500).send(e.message);
+    }
+
+    return res.status(200).send({
+        success: true,
+    });
+});
+
+router.post('/setBio', auth, async (req, res) => {
+    const { bio } = req.body;
+
+    if (!bio) {
+        return res.status(400).json({
+            bio: 'No bio found',
+        });
+    }
+
+    try {
+        req.user.bio = bio;
         await req.user.save();
     } catch (e) {
         console.log(e);

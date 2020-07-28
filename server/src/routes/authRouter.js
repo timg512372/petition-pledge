@@ -1,6 +1,6 @@
 const express = require('express');
 const User = require('../models/User');
-const { auth } = require('../utils/authMiddleware');
+const { auth, getImageKit } = require('../utils/authMiddleware');
 
 const router = express.Router();
 
@@ -106,6 +106,17 @@ router.post('/logoutAll', auth, async (req, res) => {
     }
 
     return res.status(200).json({ success: true });
+});
+
+router.get('/imageKit', (req, res) => {
+    try {
+        const imagekit = getImageKit();
+        const authenticationParameters = imagekit.getAuthenticationParameters();
+        return res.status(200).json(authenticationParameters);
+    } catch (e) {
+        console.log(e);
+        return res.status(400).send(e.message);
+    }
 });
 
 module.exports = router;

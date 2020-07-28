@@ -1,10 +1,25 @@
 const express = require('express');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
 const Petition = require('../models/Petition');
-const { auth } = require('../utils/authMiddleware');
+const { auth, getImageKit } = require('../utils/authMiddleware');
 const User = require('../models/User');
 const Tag = require('../models/Tag');
 
 const router = express.Router();
+
+const storage = multer.diskStorage({
+    destination(req, file, callback) {
+        callback(null, path.join(__dirname, '../../uploads/'));
+    },
+    filename(req, file, callback) {
+        callback(null, `${file.fieldname}_${Date.now()}_${file.originalname}`);
+    },
+});
+
+upload = multer({ storage, limits: { fieldSize: 16 * 1024 * 1024 } });
 
 router.get('/', async (req, res) => {
     const { id, query, tags } = req.query;
@@ -32,7 +47,7 @@ router.get('/', async (req, res) => {
     });
 });
 
-router.post('/newPetition', auth, async (req, res) => {
+router.post('/newPetition', upload.any('fileData'), auth, async (req, res) => {
     const { name, description, url, goal, tags } = req.body;
 
     if (!name) {
@@ -54,6 +69,13 @@ router.post('/newPetition', auth, async (req, res) => {
     }
 
     try {
+        const imageKit = getImageKit();
+        const result = await imageKit.upload({
+            file: fs.readFileSync(req.files[0].path),
+            fileName:
+                req.body.name != 'undefined' ? req.body.name : `${req.user._id}-${Date.now()}`,
+        });
+
         let date = new Date();
         let newPetition = new Petition({
             name,
@@ -64,6 +86,7 @@ router.post('/newPetition', auth, async (req, res) => {
             creator: req.user._id,
             date: date.toISOString(),
             tags: tags ? tags : [],
+            picture: result.url,
         });
         await newPetition.save();
 

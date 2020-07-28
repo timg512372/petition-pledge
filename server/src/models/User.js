@@ -38,11 +38,11 @@ const userSchema = new mongoose.Schema({
         type: String,
     },
     pfp: {
-        data: {
-            type: Buffer,
-        },
-        contentType: {
-            type: String,
+        type: String,
+        validate(value) {
+            if (!validator.isURL(value)) {
+                throw new Error('Not a valid URL');
+            }
         },
     },
     friends: {
@@ -108,7 +108,7 @@ userSchema.methods.publicProfile = function (requester) {
     delete user.friendRequests;
     delete user.feed;
 
-    if (!requester.friends.includes(user._id)) {
+    if (!requester || !requester.friends.includes(user._id)) {
         delete user.activity;
         delete user.friends;
     }

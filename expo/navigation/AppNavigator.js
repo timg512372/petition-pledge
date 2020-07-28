@@ -3,16 +3,23 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+
 import SignInScreen from '../screens/auth/SignInScreen';
 import NewUserScreen from '../screens/auth/NewUserScreen';
+
 import TimelineScreen from '../screens/timeline/TimelineScreen';
+
 import ExplorePetitionScreen from '../screens/petition/ExplorePetitionScreen';
+import NewPetitionScreen from '../screens/petition/NewPetitionScreen';
 import PetitionModal from '../screens/petition/PetitionModal';
+import TagScreen from '../screens/petition/TagScreen';
+
+import ProfileModal from '../screens/profile/ProfileModal';
 import ProfileScreen from '../screens/profile/ProfileScreen';
 import InboxScreen from '../screens/profile/InboxScreen';
-import NewPetitionScreen from '../screens/petition/NewPetitionScreen';
-import ProfileModal from '../screens/profile/ProfileModal';
-import TagScreen from '../screens/petition/TagScreen';
+import FriendsScreen from '../screens/profile/FriendsScreen';
+import SettingsScreen from '../screens/profile/SettingsScreen';
+import { Settings } from 'react-native';
 
 const Auth = createStackNavigator();
 const AuthNavigator = () => {
@@ -31,8 +38,18 @@ const DiscoverNavigator = () => {
         <Discover.Navigator headerMode={null}>
             <Discover.Screen name="Tag" component={TagScreen} />
             <Discover.Screen name="ExplorePetition" component={ExplorePetitionScreen} />
-            {/* <Auth.Screen name="ForgetPassword" component={ForgetPasswordScreen} /> */}
         </Discover.Navigator>
+    );
+};
+
+const Profile = createStackNavigator();
+const ProfileNavigator = () => {
+    return (
+        <Profile.Navigator headerMode={null}>
+            <Profile.Screen name="Profile" component={ProfileScreen} />
+            <Profile.Screen name="Friends" component={FriendsScreen} />
+            <Profile.Screen name="Settings" component={SettingsScreen} />
+        </Profile.Navigator>
     );
 };
 
@@ -64,7 +81,7 @@ const UserNavigator = () => {
                 component={NewPetitionScreen}
             />
             <User.Screen name="Inbox" component={InboxScreen} />
-            <User.Screen name="Me" component={ProfileScreen} />
+            <User.Screen name="Me" component={ProfileNavigator} />
         </User.Navigator>
     );
 };
@@ -86,7 +103,11 @@ const AppNavigator = () => {
         <NavigationContainer>
             <App.Navigator headerMode={null}>
                 <App.Screen name="Auth" component={AuthNavigator} />
-                <App.Screen name="User" component={ModalNavigator} />
+                <App.Screen
+                    name="User"
+                    component={ModalNavigator}
+                    options={{ gestureEnabled: false }}
+                />
             </App.Navigator>
         </NavigationContainer>
     );
