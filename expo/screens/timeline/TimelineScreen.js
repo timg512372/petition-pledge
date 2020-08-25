@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, ScrollView } from 'react-native';
+import { View, ScrollView, RefreshControl } from 'react-native';
 import { Text, Input, Button } from '@ui-kitten/components';
 import { connect } from 'react-redux';
 import {
@@ -16,6 +16,7 @@ class Timeline extends Component {
     }
 
     render() {
+        console.log(this.props.petition.timeline);
         return (
             <View
                 style={{
@@ -26,29 +27,32 @@ class Timeline extends Component {
                 }}
             >
                 <Text category="h4"> Your Timeline </Text>
-                <Button onPress={() => this.props.getTimeline(this.props.auth.token)}>
-                    {' '}
-                    Refresh{' '}
-                </Button>
-                <ScrollView>
-                    {this.props.petition.timeline
-                        ? this.props.petition.timeline.map((item, i) => (
-                              <>
-                                  <EventCard
-                                      person={item.user}
-                                      petition={item.petition}
-                                      type={item.type}
-                                      date={item.date}
-                                      onPress={() =>
-                                          this.props.navigation.navigate('PetitionModal', {
-                                              petition: item.petition,
-                                          })
-                                      }
-                                      key={i}
-                                  />
-                              </>
-                          ))
-                        : null}
+                <ScrollView
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={this.props.status.loading}
+                            onRefresh={() => this.props.getTimeline(this.props.auth.token)}
+                        />
+                    }
+                >
+                    {this.props.petition.timeline && this.props.petition.timeline[0] ? (
+                        this.props.petition.timeline.map((item, i) => (
+                            <EventCard
+                                person={item.user}
+                                petition={item.petition}
+                                type={item.type}
+                                date={item.date}
+                                onPress={() =>
+                                    this.props.navigation.navigate('PetitionModal', {
+                                        petition: item.petition,
+                                    })
+                                }
+                                key={i}
+                            />
+                        ))
+                    ) : (
+                        <Text> No Timeline Events</Text>
+                    )}
                 </ScrollView>
             </View>
         );
@@ -56,8 +60,8 @@ class Timeline extends Component {
 }
 
 const mapStateToProps = (state) => {
-    const { auth, petition } = state;
-    return { auth, petition };
+    const { auth, petition, status } = state;
+    return { auth, petition, status };
 };
 
 export default connect(mapStateToProps, { getTimeline })(Timeline);

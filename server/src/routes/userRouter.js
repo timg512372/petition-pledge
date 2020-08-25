@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const validator = require('validator');
 const User = require('../models/User');
 const Petition = require('../models/Petition');
 const { auth, getImageKit } = require('../utils/authMiddleware');
@@ -61,10 +62,8 @@ router.get('/activity', auth, async (req, res) => {
             user = await User.findById(item.user);
             user = user.publicProfile(req.user);
 
-            let date = new Date(item.date);
-
             let activity = {
-                date: date.toDateString(),
+                date: item.date,
                 type: item.type,
                 petition,
                 user,
@@ -87,16 +86,14 @@ router.get('/activity', auth, async (req, res) => {
 router.get('/feed', auth, async (req, res) => {
     let feed = [];
     try {
-        let promises = req.user.feed.map(async (item) => {
+        let promises = req.user.feed.reverse().map(async (item) => {
             let petition = await Petition.findById(item.petition);
 
             user = await User.findById(item.user);
             user = user.publicProfile(req.user);
 
-            let date = new Date(item.date);
-
             let activity = {
-                date: date.toDateString(),
+                date: item.date,
                 type: item.type,
                 petition,
                 user,
@@ -281,6 +278,57 @@ router.post('/setBio', auth, async (req, res) => {
 
     return res.status(200).send({
         success: true,
+    });
+});
+
+router.post('/sendContacts', auth, async (req, res) => {
+    const { contacts } = req.body;
+
+    if (!contacts || !contacts[0]) {
+        return res.status(400).json({
+            contacts: 'No contact emails found',
+        });
+    }
+
+    try {
+        let sanitizedContacts = [];
+        contacts.forEach((element) => {
+            if (validator.isEmail(element)) {
+                sanitizedContacts.push(element);
+            }
+        });
+
+        req.user.contacts = sanitizedContacts;
+        await req.user.save();
+    } catch (e) {
+        console.log(e);
+        return res.status(500).send(e.message);
+    }
+
+    return res.status(200).send({
+        success: true,
+    });
+});
+
+// Implement a path algorithm on this later
+router.get('/recommendedUsers', auth, async (req, res) => {
+    let recommended = [];
+    try {
+        if (req.user.contacts) {
+            recommended = await User.find({
+                email: { $in: req.user.contacts },
+                _id: { $nin: [...req.user.friends, ...req.user.friendRequests] },
+            });
+            recommended = recommended.map((element) => element.publicProfile(req.user));
+        }
+    } catch (e) {
+        console.log(e);
+        return res.status(500).send(e.message);
+    }
+
+    return res.status(200).send({
+        success: true,
+        recommended,
     });
 });
 

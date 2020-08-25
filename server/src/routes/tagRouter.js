@@ -13,7 +13,7 @@ router.get('/', async (req, res) => {
         if (query) {
             tags = await Tag.fuzzySearch(query);
         } else {
-            tags = await Tag.find();
+            tags = await Tag.find().sort({ usage: 'descending' });
         }
     } catch (e) {
         console.log(e.message);

@@ -109,11 +109,17 @@ export const search = (query, token) => {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
-            console.log('searched');
+            const tagSearch = await axios.get(`${SERVER_URL}/api/tag/`, {
+                params: { query },
+            });
 
             return dispatch({
                 type: types.GET_SEARCH,
-                payload: { petitions: petitionSearch.data.petitions, users: userSearch.data.users },
+                payload: {
+                    petitions: petitionSearch.data.petitions,
+                    users: userSearch.data.users,
+                    tags: tagSearch.data.tags,
+                },
             });
         } catch (e) {
             console.log(e.response.data);
@@ -137,7 +143,11 @@ export const signPetition = (petitionId, token) => {
                 }
             );
 
-            dispatch({ type: types.SET_SUCCESS, payload: 'Successfully Signed Petition' });
+            const response = await axios.get(`${SERVER_URL}/api/user/activity`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            dispatch({ type: types.GET_ACTIVITY, payload: response.data.activity });
+            return dispatch({ type: types.SET_SUCCESS, payload: 'Successfully Signed Petition' });
         } catch (e) {
             console.log(e.response.data);
             return dispatch({
@@ -153,7 +163,6 @@ export const newPetition = (name, description, url, goal, token, tags, photo) =>
         dispatch({ type: types.SET_LOADING, payload: true });
 
         const data = new FormData();
-
         data.append('name', name);
         data.append('description', description);
         data.append('url', url);
@@ -161,13 +170,15 @@ export const newPetition = (name, description, url, goal, token, tags, photo) =>
         data.append('token', token);
 
         let trimmedTags = tags.map((tag) => tag.name);
-        data.append('tags', trimmedTags);
-        data.append('photo', {
-            name: photo.uri,
-            type: photo.type,
-            uri: Platform.OS === 'android' ? photo.uri : photo.uri.replace('file://', ''),
-        });
-
+        console.log(trimmedTags);
+        data.append('tags', JSON.stringify(trimmedTags));
+        if (photo.uri) {
+            data.append('photo', {
+                name: photo.uri,
+                type: photo.type,
+                uri: Platform.OS === 'android' ? photo.uri : photo.uri.replace('file://', ''),
+            });
+        }
         try {
             await axios.post(`${SERVER_URL}/api/petition/newPetition`, data, {
                 headers: { Authorization: `Bearer ${token}` },

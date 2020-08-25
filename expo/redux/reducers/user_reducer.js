@@ -3,6 +3,7 @@ import * as types from '../types';
 const INITIAL_STATE = {
     friendRequests: [],
     friends: [],
+    recommendedUsers: [],
 };
 
 export default function (state = INITIAL_STATE, action) {
@@ -11,6 +12,8 @@ export default function (state = INITIAL_STATE, action) {
             return { ...state, friendRequests: action.payload };
         case types.GET_FRIENDS:
             return { ...state, friends: action.payload };
+        case types.GET_RECOMMENDED_USERS:
+            return { ...state, recommendedUsers: action.payload };
         default:
             return state;
     }

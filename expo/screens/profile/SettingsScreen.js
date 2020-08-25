@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, ScrollView, Image } from 'react-native';
+import { View, TouchableWithoutFeedback, Image, Keyboard } from 'react-native';
 import { Text, Input, Button } from '@ui-kitten/components';
 import { connect } from 'react-redux';
 import {
@@ -55,41 +55,52 @@ class SettingsScreen extends Component {
 
     render() {
         return (
-            <View
-                style={{
-                    paddingHorizontal: vw(5),
-                    paddingTop: vw(10),
-                    width: vw(100),
-                    height: vh(100),
-                }}
-            >
-                <Text category="h4"> Settings </Text>
-                <Text category="h4"> Profile Picture </Text>
-                {this.state.image ? (
-                    <Image source={{ uri: this.state.image }} style={{ width: 300, height: 300 }} />
-                ) : null}
-                <Button onPress={this.pickImage}> Choose Profile Picture </Button>
-
-                <Input
-                    placeholder="Your Bio"
-                    multiline={true}
-                    onChangeText={(bio) => this.setState({ bio })}
-                    value={this.state.bio}
-                    textStyle={{ minHeight: 64 }}
-                />
-                <Button onPress={() => this.props.setBio(this.state.bio, this.props.auth.token)}>
-                    {' '}
-                    Set Bio{' '}
-                </Button>
-
-                <Button
-                    onPress={() =>
-                        this.props.logoutUser(this.props.auth.token, this.props.navigation)
-                    }
+            <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+                <View
+                    style={{
+                        paddingHorizontal: vw(5),
+                        paddingTop: vw(10),
+                        width: vw(100),
+                        height: vh(100),
+                    }}
                 >
-                    Log Out
-                </Button>
-            </View>
+                    <Text category="h4"> Settings </Text>
+                    <Text category="h4"> Profile Picture </Text>
+                    {this.state.image ? (
+                        <Image
+                            source={{ uri: this.state.image }}
+                            style={{ width: 300, height: 300 }}
+                        />
+                    ) : null}
+                    <Button onPress={this.pickImage}> Choose Profile Picture </Button>
+
+                    <Input
+                        placeholder="Your Bio"
+                        multiline={true}
+                        onChangeText={(bio) => this.setState({ bio })}
+                        value={this.state.bio}
+                        textStyle={{ minHeight: 64 }}
+                    />
+                    <Button
+                        onPress={() => this.props.setBio(this.state.bio, this.props.auth.token)}
+                    >
+                        {' '}
+                        Set Bio{' '}
+                    </Button>
+
+                    <Text>{this.props.status.loading ? 'Loading' : null}</Text>
+                    <Text>{this.props.status.error ? this.props.status.error : null}</Text>
+                    <Text>{this.props.status.success ? this.props.status.success : null}</Text>
+
+                    <Button
+                        onPress={() =>
+                            this.props.logoutUser(this.props.auth.token, this.props.navigation)
+                        }
+                    >
+                        Log Out
+                    </Button>
+                </View>
+            </TouchableWithoutFeedback>
         );
     }
 }

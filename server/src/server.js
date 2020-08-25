@@ -2,7 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const multer = require('multer');
+const fs = require('fs-extra');
+const path = require('path');
 
 const authRouter = require('./routes/authRouter');
 const petitionRouter = require('./routes/petitionRouter');
@@ -28,6 +29,18 @@ app.use('/api/auth/', authRouter);
 app.use('/api/petition/', petitionRouter);
 app.use('/api/user/', userRouter);
 app.use('/api/tag/', tagRouter);
+
+const dir = path.join(__dirname, '../uploads/');
+
+if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir);
+}
+
+setInterval(async function () {
+    console.log('Clearing uploads folder');
+    await fs.remove(dir);
+    fs.mkdirSync(dir);
+}, 8.64e7);
 
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);

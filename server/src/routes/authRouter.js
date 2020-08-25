@@ -1,6 +1,9 @@
 const express = require('express');
 const User = require('../models/User');
 const { auth, getImageKit } = require('../utils/authMiddleware');
+const jwt = require('jsonwebtoken');
+const jwksClient = require('jwks-rsa');
+const assert = require('assert');
 
 const router = express.Router();
 
@@ -36,6 +39,61 @@ router.post('/login', async (req, res) => {
         success: true,
         user,
         token,
+    });
+});
+
+router.post('/loginApple', async (req, res) => {
+    const { token } = req.body;
+    if (!token) {
+        return res.status(400).json({
+            token: 'Token not found',
+        });
+    }
+
+    let user = {};
+    let nodeToken = '';
+
+    const client = jwksClient({
+        jwksUri: 'https://appleid.apple.com/auth/keys',
+    });
+
+    const decoded = jwt.decode(token, { complete: true });
+    console.log(decoded);
+
+    try {
+        client.getSigningKey(decoded.header.kid, (err, key) => {
+            const signingKey = key.getPublicKey();
+            jwt.verify(token, signingKey);
+        });
+        assert(decoded.payload.iss == 'https://appleid.apple.com');
+
+        user = await User.findOne({ email: decoded.payload.email });
+
+        if (user) {
+            nodeToken = await user.generateAuthToken();
+        } else {
+            await User.init();
+
+            user = new User({
+                name: decoded.payload.email.split('@')[0],
+                email: decoded.payload.email,
+                password: token,
+                friends: [],
+                friendRequests: [],
+                activity: [],
+            });
+            await user.save();
+            nodeToken = await user.generateAuthToken();
+        }
+    } catch (e) {
+        console.log(e);
+        return res.status(400).send('Unable to log in');
+    }
+
+    return res.status(200).send({
+        success: true,
+        user,
+        token: nodeToken,
     });
 });
 

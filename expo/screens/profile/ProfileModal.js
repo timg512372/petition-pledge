@@ -12,16 +12,25 @@ import EventCard from '../../components/EventCard';
 
 class ProfileModal extends Component {
     componentDidMount() {
-        if (this.props.route.params.user._id === this.props.auth.user._id) {
-            this.props.navigation.navigate('Me');
-        }
+        if (this.props.route.params.user) {
+            if (this.props.route.params.user._id === this.props.auth.user._id) {
+                this.props.navigation.navigate('Me');
+            }
 
-        this.props.getSelectedActivity(this.props.auth.token, this.props.route.params.user._id);
+            this.props.getSelectedActivity(this.props.auth.token, this.props.route.params.user._id);
+        }
     }
 
     render() {
         const { user } = this.props.route.params;
         console.log(user);
+        if (!user) {
+            return (
+                <View style={{ marginTop: vw(10) }}>
+                    <Text category="h3">User not found!</Text>
+                </View>
+            );
+        }
 
         return (
             <View

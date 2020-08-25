@@ -5,15 +5,20 @@ import {
     widthPercentageToDP as vw,
     heightPercentageToDP as vh,
 } from 'react-native-responsive-screen';
-import { PETITION } from '../assets';
 import ProgressBar from './ProgressBar';
 
 const EventCard = (props) => {
+    let date = '';
+    if (props.date) {
+        let dateObj = new Date(props.date);
+        date = dateObj.toLocaleDateString();
+    }
+
     return (
         <TouchableOpacity
             style={{
-                borderWidth: 2,
-                borderColor: 'black',
+                borderWidth: 3,
+                borderColor: '#3C2165',
                 width: vw(90),
                 borderRadius: vw(3),
                 padding: vw(2),
@@ -29,13 +34,15 @@ const EventCard = (props) => {
                     width: '100%',
                 }}
             >
-                <Text>
+                <Text status="success" category="c1">
+                    {props.type == 'CREATE_PETITION' ? 'Created by ' : 'Signed by '}
                     {props.person ? props.person.name : 'Loading'}{' '}
-                    {props.type == 'CREATE_PETITION' ? 'created' : 'signed'}
                 </Text>
-                <Text>{props.date}</Text>
+                <Text status="success" category="c1">
+                    {date}
+                </Text>
             </View>
-            <Text category="h5" style={{ marginBottom: vw(1) }}>
+            <Text category="h6" style={{ marginVertical: vw(1) }}>
                 {props.petition ? props.petition.name : 'Loading'}
             </Text>
             {/* <Image source={PETITION} style={{ width: 488 / 3, height: 488 / 3 }} /> */}

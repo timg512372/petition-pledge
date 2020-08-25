@@ -1,4 +1,5 @@
 import React from 'react';
+import { View } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
@@ -70,6 +71,14 @@ const UserNavigator = () => {
                     );
                 },
             })}
+            tabBarOptions={{
+                activeTintColor: '#67438D',
+                inactiveTintColor: '#56a993',
+                style: {
+                    marginTop: -1,
+                    zIndex: -10,
+                },
+            }}
         >
             <User.Screen name="Home" component={TimelineScreen} />
             <User.Screen name="Discover" component={DiscoverNavigator} />

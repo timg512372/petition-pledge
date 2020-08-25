@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { View, ScrollView } from 'react-native';
-import { Text, Input, Button } from '@ui-kitten/components';
+import { View, ScrollView, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import { Text } from '@ui-kitten/components';
 import { connect } from 'react-redux';
 import {
     widthPercentageToDP as vw,
@@ -19,32 +19,34 @@ class ExplorePetition extends Component {
         let tag = this.props.route.params.tag.name;
         console.log(this.props.petition.tag);
         return (
-            <View
-                style={{
-                    paddingHorizontal: vw(5),
-                    paddingTop: vw(10),
-                    width: vw(100),
-                    height: vh(100),
-                }}
-            >
-                <Text category="h4"> Explore Petitions </Text>
-                <Text category="h6"> Tag: {tag} </Text>
-                <ScrollView style={{ flexWrap: 'wrap', flexDirection: 'row', width: vw(90) }}>
-                    {this.props.petition.tag
-                        ? this.props.petition.tag.map((petition) => (
-                              <PetitionCard
-                                  petition={petition}
-                                  onPress={() =>
-                                      this.props.navigation.navigate('PetitionModal', {
-                                          petition,
-                                      })
-                                  }
-                                  key={petition._id}
-                              />
-                          ))
-                        : null}
-                </ScrollView>
-            </View>
+            <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+                <View
+                    style={{
+                        paddingHorizontal: vw(5),
+                        paddingTop: vw(10),
+                        width: vw(100),
+                        height: vh(100),
+                    }}
+                >
+                    <Text category="h4"> Explore Petitions </Text>
+                    <Text category="h6"> Tag: {tag} </Text>
+                    <ScrollView style={{ flexWrap: 'wrap', flexDirection: 'row', width: vw(90) }}>
+                        {this.props.petition.tag
+                            ? this.props.petition.tag.map((petition) => (
+                                  <PetitionCard
+                                      petition={petition}
+                                      onPress={() =>
+                                          this.props.navigation.navigate('PetitionModal', {
+                                              petition,
+                                          })
+                                      }
+                                      key={petition._id}
+                                  />
+                              ))
+                            : null}
+                    </ScrollView>
+                </View>
+            </TouchableWithoutFeedback>
         );
     }
 }

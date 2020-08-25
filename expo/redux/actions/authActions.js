@@ -2,6 +2,7 @@ import axios from 'axios';
 import { SERVER_URL } from 'react-native-dotenv';
 import * as types from '../types';
 import { processError } from '../../components/functions';
+import * as AppleAuthentication from 'expo-apple-authentication';
 
 export const loginUser = (email, password) => {
     return async (dispatch) => {
@@ -43,6 +44,35 @@ export const registerUser = (name, email, password, cpassword) => {
     };
 };
 
+export const loginApple = (token, name) => {
+    return async (dispatch) => {
+        dispatch({ type: types.SET_LOADING, payload: true });
+        // let fullName = name.givenName + ' ' + name.familyName;
+
+        try {
+            const credential = await AppleAuthentication.signInAsync({
+                requestedScopes: [
+                    AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+                    AppleAuthentication.AppleAuthenticationScope.EMAIL,
+                ],
+            });
+            console.log(credential);
+
+            let user = await axios.post(`${SERVER_URL}/api/auth/loginApple`, {
+                token: credential.identityToken,
+            });
+
+            return dispatch({ type: types.LOGIN_USER_SUCCESS, payload: user.data });
+        } catch (e) {
+            console.log(e.response ? e.response.data : e.code);
+            return dispatch({
+                type: types.LOGIN_USER_ERROR,
+                payload: processError(e.response ? e.response.data : e.code),
+            });
+        }
+    };
+};
+
 export const logoutUser = (token, navigation) => {
     return async (dispatch) => {
         dispatch({ type: types.SET_LOADING, payload: true });
@@ -69,6 +99,7 @@ export const logoutUser = (token, navigation) => {
 };
 
 export const updateUser = (token) => {
+    console.log('updating user');
     return async (dispatch) => {
         dispatch({ type: types.SET_LOADING, payload: true });
 

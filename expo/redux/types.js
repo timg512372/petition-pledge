@@ -27,3 +27,4 @@ export const NEW_TAG = 'new-tag';
 // User Stuff
 export const GET_FRIEND_REQUESTS = 'get-friend-requests';
 export const GET_FRIENDS = 'get-friends';
+export const GET_RECOMMENDED_USERS = 'get-recommended-users';

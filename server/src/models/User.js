@@ -69,6 +69,9 @@ const userSchema = new mongoose.Schema({
             },
         },
     ],
+    contacts: {
+        type: Array,
+    },
 });
 
 userSchema.statics.findByCredentials = async (email, password) => {
@@ -99,6 +102,7 @@ userSchema.methods.toJSON = function () {
     const user = this.toObject();
     delete user.password;
     delete user.tokens;
+    delete user.contacts;
     return user;
 };
 

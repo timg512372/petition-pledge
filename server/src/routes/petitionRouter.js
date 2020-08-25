@@ -49,6 +49,7 @@ router.get('/', async (req, res) => {
 
 router.post('/newPetition', upload.any('fileData'), auth, async (req, res) => {
     const { name, description, url, goal, tags } = req.body;
+    const tagsParse = JSON.parse(tags);
 
     if (!name) {
         return res.status(400).json({
@@ -85,13 +86,13 @@ router.post('/newPetition', upload.any('fileData'), auth, async (req, res) => {
             signers: [],
             creator: req.user._id,
             date: date.toISOString(),
-            tags: tags ? tags : [],
+            tags: tagsParse ? tagsParse : [],
             picture: result.url,
         });
         await newPetition.save();
 
-        if (tags) {
-            let promises = tags.map(async (name) => {
+        if (tagsParse) {
+            let promises = tagsParse.map(async (name) => {
                 let tag = await Tag.findOne({ name });
                 tag.usage = tag.usage + 1;
                 await tag.save();

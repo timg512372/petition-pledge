@@ -29,12 +29,28 @@ class NewUserScreen extends Component {
 
     render() {
         return (
-            <View style={{ width: vw(100), padding: vw(10), alignItems: 'center' }}>
-                <Text category="h4" style={{ marginVertical: vh(10) }}>
+            <View
+                style={{
+                    width: vw(100),
+                    height: vh(100),
+                    padding: vw(10),
+                    alignItems: 'center',
+                    backgroundColor: '#FFFFFF',
+                }}
+            >
+                <Text
+                    category="h3"
+                    status="primary"
+                    style={{ marginVertical: vh(10), textAlign: 'center', width: vw(80) }}
+                >
                     Create an Account
                 </Text>
-                <Input placeholder="Name" onChangeText={(name) => this.setState({ name })} />
-                <Input placeholder="Email" onChangeText={(email) => this.setState({ email })} />
+                <Input placeholder="Username" onChangeText={(name) => this.setState({ name })} />
+                <Input
+                    placeholder="Email"
+                    onChangeText={(email) => this.setState({ email })}
+                    style={{ marginVertical: 10 }}
+                />
                 <Input
                     placeholder="Password"
                     onChangeText={(password) => this.setState({ password })}
@@ -44,15 +60,11 @@ class NewUserScreen extends Component {
                     placeholder="Confirm Password"
                     onChangeText={(cpassword) => this.setState({ cpassword })}
                     secureTextEntry
+                    style={{ marginVertical: 10 }}
                 />
                 <Text>{this.props.auth.loading ? 'Loading' : null}</Text>
 
                 <Text>{this.props.auth.error}</Text>
-
-                <Button status="danger" style={{ margin: 10 }}>
-                    {' '}
-                    Connect with Instagram{' '}
-                </Button>
                 <Button
                     style={{ margin: 10 }}
                     onPress={() =>
@@ -63,6 +75,8 @@ class NewUserScreen extends Component {
                             this.state.cpassword
                         )
                     }
+                    size="large"
+                    status="success"
                 >
                     {' '}
                     Create Account{' '}

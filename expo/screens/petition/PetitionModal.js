@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import { View, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { Text, Button } from '@ui-kitten/components';
 import { connect } from 'react-redux';
-import * as Linking from 'expo-linking';
+import * as WebBrowser from 'expo-web-browser';
 import {
     widthPercentageToDP as vw,
     heightPercentageToDP as vh,
@@ -10,15 +10,31 @@ import {
 
 import { signPetition, getSelectedUser } from '../../redux/actions';
 import UserCard from '../../components/UserCard';
+import UserFeedback from '../../components/UserFeedback';
 
 class PetitionModal extends Component {
     componentDidMount() {
-        this.props.getSelectedUser(this.props.route.params.petition.creator, this.props.auth.token);
+        if (this.props.route.params.petition) {
+            this.props.getSelectedUser(
+                this.props.route.params.petition.creator,
+                this.props.auth.token
+            );
+        }
     }
 
     render() {
         const { petition } = this.props.route.params;
-        console.log(petition);
+        if (!petition) {
+            return (
+                <View style={{ marginTop: vw(10) }}>
+                    <Text category="h3">Petition not found!</Text>
+                </View>
+            );
+        }
+
+        let signed = petition.signers.includes(this.props.auth.user._id);
+        console.log(signed);
+
         return (
             <View
                 style={{
@@ -26,9 +42,18 @@ class PetitionModal extends Component {
                     paddingTop: vw(10),
                     width: vw(100),
                     height: vh(100),
+                    alignItems: 'center',
                 }}
             >
                 <Text category="h4">{petition.name} </Text>
+                <Image
+                    source={{ uri: petition.picture }}
+                    style={{ width: vw(40), height: vw(40) }}
+                />
+                <Text category="h6" style={{ marginTop: vh(2) }}>
+                    Created By
+                </Text>
+
                 <UserCard
                     user={this.props.petition.selectedUser}
                     onPress={() =>
@@ -41,7 +66,9 @@ class PetitionModal extends Component {
                 <Text>{petition.description}</Text>
                 <TouchableOpacity
                     onPress={() =>
-                        Linking.openURL(petition.url).catch(Alert.alert('Unable to open link'))
+                        WebBrowser.openBrowserAsync(
+                            petition.url.includes('http') ? petition.url : 'http://' + petition.url
+                        )
                     }
                 >
                     <Text category="h6" style={{ color: 'blue' }}>
@@ -55,12 +82,14 @@ class PetitionModal extends Component {
                 })}
                 <Button
                     onPress={() => this.props.signPetition(petition._id, this.props.auth.token)}
+                    disabled={signed}
                 >
-                    Sign This Petition
+                    {signed ? 'Already Signed' : 'Sign This Petition'}
                 </Button>
-                <Text>{this.props.status.loading ? 'Loading' : null}</Text>
-                <Text>{this.props.status.error ? this.props.status.error : null}</Text>
-                <Text>{this.props.status.success ? this.props.status.success : null}</Text>
+                <UserFeedback
+                    {...this.props.status}
+                    onSuccess={() => this.props.navigation.navigate('Profile')}
+                />
             </View>
         );
     }

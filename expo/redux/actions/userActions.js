@@ -153,6 +153,28 @@ export const getFriends = (token) => {
     };
 };
 
+export const getRecommendedUsers = (token) => {
+    return async (dispatch) => {
+        dispatch({ type: types.SET_LOADING, payload: true });
+        try {
+            const response = await axios.get(`${SERVER_URL}/api/user/recommendedUsers`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            return dispatch({
+                type: types.GET_RECOMMENDED_USERS,
+                payload: response.data.recommended,
+            });
+        } catch (e) {
+            console.log(e.response.data);
+            return dispatch({
+                type: types.SET_ERROR,
+                payload: processError(e.response.data),
+            });
+        }
+    };
+};
+
 export const changeProfilePicture = (photo, token) => {
     return async (dispatch) => {
         dispatch({ type: types.SET_LOADING, payload: true });
@@ -167,8 +189,6 @@ export const changeProfilePicture = (photo, token) => {
         data.append('name', photo.fileName);
         data.append('type', photo.type);
 
-        console.log(data);
-
         try {
             await axios.post(`${SERVER_URL}/api/user/changeProfilePicture`, data, {
                 headers: {
@@ -176,6 +196,13 @@ export const changeProfilePicture = (photo, token) => {
                     'Content-Type': 'multipart/form-data',
                 },
             });
+
+            const response = await axios.get(`${SERVER_URL}/api/user/`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            dispatch({ type: types.UPDATE_USER, payload: response.data.users });
+
+            dispatch({ type: types.SET_SUCCESS, payload: 'Successfully Updated Profile Picture' });
         } catch (e) {
             console.log(e.response.data);
             return dispatch({
@@ -198,10 +225,43 @@ export const setBio = (bio, token) => {
                 }
             );
 
+            const response = await axios.get(`${SERVER_URL}/api/user/`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            dispatch({ type: types.UPDATE_USER, payload: response.data.users });
+
             return dispatch({
                 type: types.SET_SUCCESS,
                 payload: 'Successfully updated description',
             });
+        } catch (e) {
+            console.log(e.response.data);
+            return dispatch({
+                type: types.SET_ERROR,
+                payload: processError(e.response.data),
+            });
+        }
+    };
+};
+
+export const connectContacts = (contacts, token) => {
+    return async (dispatch) => {
+        dispatch({ type: types.SET_LOADING, payload: true });
+
+        try {
+            await axios.post(
+                `${SERVER_URL}/api/user/sendContacts`,
+                { contacts },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            console.log('activated');
+
+            dispatch({ type: types.SET_SUCCESS, payload: 'Successfully Added Contacts' });
         } catch (e) {
             console.log(e.response.data);
             return dispatch({

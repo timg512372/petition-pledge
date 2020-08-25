@@ -20,6 +20,7 @@ export default function (state = INITIAL_STATE, action) {
         case types.GET_PETITIONS:
         case types.GET_SELECTED_PROFILE:
         case types.GET_SELECTED_ACTIVITY:
+        case types.GET_RECOMMENDED_USERS:
         case types.GET_SEARCH:
             return INITIAL_STATE;
 
