@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Image, TouchableOpacity } from 'react-native';
+import { View, Image } from 'react-native';
 import { Text, Button } from '@ui-kitten/components';
 import { Ionicons } from '@expo/vector-icons';
 import {
@@ -8,6 +8,29 @@ import {
 } from 'react-native-responsive-screen';
 
 class UserHeader extends Component {
+    renderActivity() {
+        const currentDate = new Date();
+
+        // active today, active yesterday, active this week, active this month, inactive
+
+        if (!this.props.user.lastActive) {
+            return 'Inactive';
+        }
+
+        const lastActive = new Date(this.props.user.lastActive);
+        if (currentDate.getTime() - lastActive.getTime() > 8.64e7 * 30) {
+            return 'Inactive';
+        } else if (currentDate.getTime() - lastActive.getTime() > 8.64e7 * 7) {
+            return 'Active This Month';
+        } else if (currentDate.getDate() == lastActive.getDate()) {
+            return 'Active Today';
+        } else if (currentDate.getDate() == lastActive.getDate() + 1) {
+            return 'Active Yesterday';
+        } else {
+            return 'Active This Week';
+        }
+    }
+
     render() {
         console.log(this.props.user);
 
@@ -58,7 +81,7 @@ class UserHeader extends Component {
                         }}
                     >
                         <Ionicons name="ios-flash" size={vw(5)} />
-                        <Text category="c1">&emsp;Active this Week </Text>
+                        <Text category="c1">&emsp;{this.renderActivity()} </Text>
                     </View>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <Button
@@ -68,18 +91,21 @@ class UserHeader extends Component {
                             onPress={this.props.onPressFriends}
                             style={{ marginRight: vw(3) }}
                         >
-                            {this.props.user.friends.length} Friends
+                            {this.props.user.friends ? this.props.user.friends.length : 0} Friends
                         </Button>
 
-                        {this.props.self ? (
-                            <Button
-                                status="success"
-                                size="small"
-                                onPress={this.props.onPressFriends}
-                            >
-                                Find Friends
-                            </Button>
-                        ) : null}
+                        <Button
+                            status="success"
+                            size="small"
+                            onPress={this.props.onPressFriends}
+                            disabled={this.props.friends}
+                        >
+                            {this.props.self
+                                ? 'Find Friends'
+                                : this.props.friends
+                                ? 'Already Friends'
+                                : 'Add Friend'}
+                        </Button>
                     </View>
                 </View>
             </View>

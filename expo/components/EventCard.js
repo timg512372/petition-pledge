@@ -47,7 +47,11 @@ const EventCard = (props) => {
             </Text>
             {/* <Image source={PETITION} style={{ width: 488 / 3, height: 488 / 3 }} /> */}
             {props.petition ? (
-                <ProgressBar current={props.petition.signers.length} goal={props.petition.goal} />
+                <ProgressBar
+                    current={props.petition.signers.length}
+                    goal={props.petition.goal}
+                    point
+                />
             ) : null}
         </TouchableOpacity>
     );

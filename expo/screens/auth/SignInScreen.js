@@ -1,15 +1,16 @@
 import React, { Component } from 'react';
 import { View, Platform } from 'react-native';
-import { Text, Input, Button } from '@ui-kitten/components';
+import { Text, Input, Button, Spinner } from '@ui-kitten/components';
 import { connect } from 'react-redux';
 import * as AppleAuthentication from 'expo-apple-authentication';
-// import * as Google from 'expo-google-app-auth';
+import AsyncStorage from '@react-native-community/async-storage';
+
 import {
     widthPercentageToDP as vw,
     heightPercentageToDP as vh,
 } from 'react-native-responsive-screen';
 
-import { loginUser, clear, loginApple } from '../../redux/actions';
+import { loginUser, clear, loginApple, loginToken } from '../../redux/actions';
 import UserFeedback from '../../components/UserFeedback';
 
 class SignInScreen extends Component {
@@ -18,17 +19,43 @@ class SignInScreen extends Component {
         password: '',
     };
 
-    componentWillMount() {
+    async componentWillMount() {
         this.props.clear();
+        const value = await AsyncStorage.getItem('@authToken');
+        if (value) {
+            console.log('Found persisted value');
+            this.props.loginToken(value);
+        }
     }
 
-    componentWillReceiveProps(nextProps) {
+    async componentWillReceiveProps(nextProps) {
         if (nextProps.auth.user) {
+            await AsyncStorage.setItem('@authToken', nextProps.auth.token);
             nextProps.navigation.navigate('User');
         }
     }
 
     render() {
+        console.log(this.props.auth);
+        if (this.props.auth.cacheLoading) {
+            return (
+                <View
+                    style={{
+                        width: vw(100),
+                        padding: vw(10),
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: '#FFFFFF',
+                        height: vh(100),
+                    }}
+                >
+                    <Text category="h1" status="primary">
+                        Signing In
+                    </Text>
+                    <Spinner size="large" />
+                </View>
+            );
+        }
         return (
             <View
                 style={{
@@ -97,4 +124,4 @@ const mapStateToProps = (state) => {
     return { auth };
 };
 
-export default connect(mapStateToProps, { loginUser, clear, loginApple })(SignInScreen);
+export default connect(mapStateToProps, { loginUser, clear, loginApple, loginToken })(SignInScreen);

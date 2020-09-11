@@ -42,6 +42,29 @@ router.post('/login', async (req, res) => {
     });
 });
 
+router.post('/loginToken', async (req, res) => {
+    const { token } = req.body;
+
+    if (!token) {
+        return res.status(400).json({
+            token: 'Token not found',
+        });
+    }
+
+    try {
+        user = await User.findOne({ 'tokens.token': token });
+    } catch (e) {
+        console.log(e);
+        return res.status(400).send(e.message);
+    }
+
+    return res.status(200).send({
+        success: true,
+        user,
+        token,
+    });
+});
+
 router.post('/loginApple', async (req, res) => {
     const { token } = req.body;
     if (!token) {

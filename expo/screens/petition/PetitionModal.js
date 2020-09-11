@@ -11,6 +11,8 @@ import {
 import { signPetition, getSelectedUser } from '../../redux/actions';
 import UserCard from '../../components/UserCard';
 import UserFeedback from '../../components/UserFeedback';
+import ProgressBar from '../../components/ProgressBar';
+import TopBar from '../../components/TopBar';
 
 class PetitionModal extends Component {
     componentDidMount() {
@@ -33,7 +35,6 @@ class PetitionModal extends Component {
         }
 
         let signed = petition.signers.includes(this.props.auth.user._id);
-        console.log(signed);
 
         return (
             <View
@@ -43,53 +44,88 @@ class PetitionModal extends Component {
                     width: vw(100),
                     height: vh(100),
                     alignItems: 'center',
+                    backgroundColor: '#FFFFFF',
                 }}
             >
-                <Text category="h4">{petition.name} </Text>
-                <Image
-                    source={{ uri: petition.picture }}
-                    style={{ width: vw(40), height: vw(40) }}
-                />
-                <Text category="h6" style={{ marginTop: vh(2) }}>
-                    Created By
+                <TopBar />
+                <Text
+                    category="h2"
+                    status="primary"
+                    style={{ textAlign: 'left', marginTop: vw(1), width: vw(80) }}
+                >
+                    {petition.name}{' '}
                 </Text>
-
-                <UserCard
-                    user={this.props.petition.selectedUser}
+                <TouchableOpacity
                     onPress={() =>
                         this.props.navigation.navigate('ProfileModal', {
                             user: this.props.petition.selectedUser,
                         })
                     }
-                />
-                <Text category="h6">Description</Text>
-                <Text>{petition.description}</Text>
-                <TouchableOpacity
-                    onPress={() =>
-                        WebBrowser.openBrowserAsync(
-                            petition.url.includes('http') ? petition.url : 'http://' + petition.url
-                        )
-                    }
                 >
-                    <Text category="h6" style={{ color: 'blue' }}>
-                        Visit Petition{' '}
+                    <Text category="h6" status="success" style={{ width: vw(75) }}>
+                        by {this.props.petition.selectedUser.name}
                     </Text>
                 </TouchableOpacity>
+                <ScrollView contentContainerStyle={{ alignItems: 'center' }}>
+                    <Image
+                        source={{ uri: petition.picture }}
+                        style={{
+                            width: vw(60),
+                            height: vw(60),
+                            marginVertical: vw(7),
+                            borderRadius: vw(5),
+                        }}
+                    />
+                    <Text
+                        category="h6"
+                        status="primary"
+                        style={{ marginBottom: vw(7), paddingHorizontal: vw(6) }}
+                    >
+                        {petition.description}
+                    </Text>
 
-                <Text style={{ marginTop: 10 }}>Signers</Text>
-                {petition.signers.map((signer) => {
-                    return <Text>{signer}</Text>;
-                })}
-                <Button
-                    onPress={() => this.props.signPetition(petition._id, this.props.auth.token)}
-                    disabled={signed}
-                >
-                    {signed ? 'Already Signed' : 'Sign This Petition'}
-                </Button>
-                <UserFeedback
-                    {...this.props.status}
-                    onSuccess={() => this.props.navigation.navigate('Profile')}
-                />
+                    <ProgressBar current={petition.signers.length} goal={petition.goal} />
+                    <View
+                        style={{
+                            width: vw(68),
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            marginVertical: vw(1),
+                        }}
+                    >
+                        <TouchableOpacity
+                            onPress={() =>
+                                WebBrowser.openBrowserAsync(
+                                    petition.url.includes('http')
+                                        ? petition.url
+                                        : 'http://' + petition.url
+                                )
+                            }
+                        >
+                            <Text style={{ textDecorationLine: 'underline' }}>Visit Petition </Text>
+                        </TouchableOpacity>
+                        <Text>
+                            {petition.signers.length}/{petition.goal}
+                        </Text>
+                    </View>
+
+                    <Button style={{ marginTop: vw(15), width: vw(40), marginBottom: vw(7) }}>
+                        Other Signers
+                    </Button>
+
+                    <Button
+                        onPress={() => this.props.signPetition(petition._id, this.props.auth.token)}
+                        disabled={signed}
+                        status="success"
+                    >
+                        {signed ? 'Already Signed' : 'Sign This Petition'}
+                    </Button>
+                    <UserFeedback
+                        {...this.props.status}
+                        onSuccess={() => this.props.navigation.navigate('Profile')}
+                    />
+                </ScrollView>
             </View>
         );
     }

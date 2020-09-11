@@ -72,6 +72,14 @@ const userSchema = new mongoose.Schema({
     contacts: {
         type: Array,
     },
+    lastActive: {
+        type: String,
+        validate(value) {
+            if (!validator.isISO8601(value)) {
+                throw new Error('Not a valid date');
+            }
+        },
+    },
 });
 
 userSchema.statics.findByCredentials = async (email, password) => {
@@ -94,6 +102,7 @@ userSchema.methods.generateAuthToken = async function () {
     const token = jwt.sign({ _id: user._id.toString() }, process.env.SECRET);
 
     user.tokens.push({ token });
+    user.lastActive = new Date().toISOString();
     await user.save();
     return token;
 };

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { SERVER_URL } from 'react-native-dotenv';
+import AsyncStorage from '@react-native-community/async-storage';
 import * as types from '../types';
 import { processError } from '../../components/functions';
 import * as AppleAuthentication from 'expo-apple-authentication';
@@ -9,6 +10,23 @@ export const loginUser = (email, password) => {
         dispatch({ type: types.LOGIN_USER });
         try {
             let user = await axios.post(`${SERVER_URL}/api/auth/login`, { email, password });
+            return dispatch({ type: types.LOGIN_USER_SUCCESS, payload: user.data });
+        } catch (e) {
+            console.log(e.response.data);
+
+            return dispatch({
+                type: types.LOGIN_USER_ERROR,
+                payload: processError(e.response.data),
+            });
+        }
+    };
+};
+
+export const loginToken = (token) => {
+    return async (dispatch) => {
+        dispatch({ type: types.CACHE_USER });
+        try {
+            let user = await axios.post(`${SERVER_URL}/api/auth/loginToken`, { token });
             return dispatch({ type: types.LOGIN_USER_SUCCESS, payload: user.data });
         } catch (e) {
             console.log(e.response.data);

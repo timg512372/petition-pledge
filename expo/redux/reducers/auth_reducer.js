@@ -2,6 +2,7 @@ import * as types from '../types';
 
 const INITIAL_STATE = {
     loading: false,
+    cacheLoading: false,
     user: null,
     token: null,
     error: '',
@@ -10,6 +11,8 @@ const INITIAL_STATE = {
 
 export default function (state = INITIAL_STATE, action) {
     switch (action.type) {
+        case types.CACHE_USER:
+            return { ...state, cacheLoading: true, error: '', success: '' };
         case types.LOGIN_USER:
             return { ...state, loading: true, error: '', success: '' };
         case types.LOGIN_USER_SUCCESS:
@@ -19,9 +22,10 @@ export default function (state = INITIAL_STATE, action) {
                 token: action.payload.token,
                 error: '',
                 loading: false,
+                cacheLoading: false,
             };
         case types.LOGIN_USER_ERROR:
-            return { ...state, error: action.payload, loading: false };
+            return { ...state, error: action.payload, loading: false, cacheLoading: false };
         case types.LOGOUT_USER:
             return INITIAL_STATE;
         case types.UPDATE_USER:

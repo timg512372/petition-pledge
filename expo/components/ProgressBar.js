@@ -24,24 +24,26 @@ const ProgressBar = (props) => {
                     marginTop: vw(0),
                 }}
             >
-                <View
-                    style={{
-                        marginBottom: -14,
-                        zIndex: 10,
-                        width: 100,
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        marginLeft: fraction - 50,
-                    }}
-                >
-                    <Text style={{ marginBottom: -9 }}>{props.current}</Text>
-                    <Entypo name="triangle-down" size={24} color="#3C2165" />
-                </View>
+                {props.point ? (
+                    <View
+                        style={{
+                            marginBottom: -14,
+                            zIndex: 10,
+                            width: 100,
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            marginLeft: fraction - 50,
+                        }}
+                    >
+                        <Text style={{ marginBottom: -9 }}>{props.current}</Text>
+                        <Entypo name="triangle-down" size={24} color="#3C2165" />
+                    </View>
+                ) : null}
                 <View style={{ backgroundColor: '#DCE0E4', width: vw(70), borderRadius: vw(3) }}>
                     <View
                         style={{
                             width: fraction,
-                            backgroundColor: 'green',
+                            backgroundColor: '#56a993',
                             height: vw(3),
                             borderTopLeftRadius: vw(3),
                             borderBottomLeftRadius: vw(3),

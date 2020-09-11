@@ -98,7 +98,11 @@ const UserNavigator = () => {
 const Modal = createStackNavigator();
 const ModalNavigator = () => {
     return (
-        <Modal.Navigator headerMode={null} mode="modal">
+        <Modal.Navigator
+            headerMode={null}
+            mode="modal"
+            cardStyle={{ backgroundColor: 'transparent', opacity: 0.99 }}
+        >
             <Modal.Screen name="User" component={UserNavigator} />
             <Modal.Screen name="PetitionModal" component={PetitionModal} />
             <Modal.Screen name="ProfileModal" component={ProfileModal} />

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { View, Image, ScrollView } from 'react-native';
-import { Text, Button } from '@ui-kitten/components';
+import { View, Image, ScrollView, RefreshControl } from 'react-native';
+import { Text, Button, TabView, Tab } from '@ui-kitten/components';
 import { Ionicons } from '@expo/vector-icons';
 import { connect } from 'react-redux';
 import {
@@ -9,8 +9,15 @@ import {
 } from 'react-native-responsive-screen';
 import { sendFriendRequest, getSelectedActivity } from '../../redux/actions';
 import EventCard from '../../components/EventCard';
+import UserHeader from '../../components/UserHeader';
+import TopBar from '../../components/TopBar';
+import UserFeedback from '../../components/UserFeedback';
 
 class ProfileModal extends Component {
+    state = {
+        selectedIndex: '',
+    };
+
     componentDidMount() {
         if (this.props.route.params.user) {
             if (this.props.route.params.user._id === this.props.auth.user._id) {
@@ -21,9 +28,70 @@ class ProfileModal extends Component {
         }
     }
 
+    renderActivity(created) {
+        let { activity } = this.props.petition;
+        activity = activity.filter((item) => (item.type == 'CREATE_PETITION') == created);
+        if (activity && activity[0]) {
+            return (
+                <ScrollView
+                    contentContainerStyle={{ alignItems: 'center' }}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={this.props.status.loading}
+                            onRefresh={() => this.componentDidMount()}
+                        />
+                    }
+                >
+                    {activity.map((item, i) => (
+                        <EventCard
+                            person={item.user}
+                            petition={item.petition}
+                            type={item.type}
+                            date={item.date}
+                            onPress={() =>
+                                this.props.navigation.navigate('PetitionModal', {
+                                    petition: item.petition,
+                                })
+                            }
+                            key={i}
+                        />
+                    ))}
+                    <View style={{ height: vh(4) }} />
+                </ScrollView>
+            );
+        } else {
+            return (
+                <View
+                    style={{
+                        marginTop: vh(20),
+                        width: vw(100),
+                        paddingHorizontal: vw(5),
+                        alignItems: 'center',
+                    }}
+                >
+                    <Text style={{ color: '#CCCCCC' }}>
+                        Looks like they haven't {created ? 'created' : 'signed'} any petitions
+                    </Text>
+                    <View
+                        style={{
+                            width: vw(40),
+                            height: 2,
+                            marginTop: 10,
+                            marginBottom: 5,
+                            borderRadius: 5,
+                            backgroundColor: '#CCCCCC',
+                        }}
+                    />
+                    <Text style={{ color: '#CCCCCC' }}>
+                        Ask them to {created ? 'create' : 'sign'} some!
+                    </Text>
+                </View>
+            );
+        }
+    }
+
     render() {
         const { user } = this.props.route.params;
-        console.log(user);
         if (!user) {
             return (
                 <View style={{ marginTop: vw(10) }}>
@@ -35,61 +103,52 @@ class ProfileModal extends Component {
         return (
             <View
                 style={{
-                    paddingHorizontal: vw(5),
-                    paddingTop: vw(10),
+                    paddingTop: vw(12),
                     width: vw(100),
                     height: vh(100),
+                    // alignItems: 'center',
+                    backgroundColor: '#FFFFFF',
                 }}
             >
-                <Text status="info">
-                    You can go back by swiping down from somewhere near the top, like around where
-                    this is located
+                <TopBar />
+                <Text
+                    category="h5"
+                    status="primary"
+                    style={{ width: vw(100), textAlign: 'center' }}
+                >
+                    {user.name}
                 </Text>
-                {user.pfp ? (
-                    <Image
-                        source={{ uri: user.pfp }}
-                        style={{ width: vw(9), height: vw(9), borderRadius: vw(4.5) }}
-                    />
-                ) : (
-                    <Ionicons name="ios-contact" size={vw(9)} />
-                )}
-                <Text category="h4"> {user.name} </Text>
-                <Text> {user.bio} </Text>
+                <UserHeader
+                    user={user}
+                    self={false}
+                    onPressFriends={() =>
+                        this.props.sendFriendRequest(user._id, this.props.auth.token)
+                    }
+                    friends={this.props.auth.user.friends.includes(user._id)}
+                    // onPressRecommended={() => this.props.navigation.navigate('Recommended')}
+                />
 
-                {this.props.auth.user.friends.includes(user._id) ? (
-                    <Text>Friends</Text>
-                ) : (
-                    <Button
-                        onPress={() =>
-                            this.props.sendFriendRequest(user._id, this.props.auth.token)
-                        }
+                <TabView
+                    selectedIndex={this.state.selectedIndex}
+                    onSelect={(selectedIndex) => this.setState({ selectedIndex })}
+                    style={{ marginTop: vh(1), marginBottom: vh(17) }}
+                >
+                    <Tab
+                        title={(props) => (
+                            <Text style={{ ...props.style, fontSize: 20 }}>Created</Text>
+                        )}
                     >
-                        Send Friend Request
-                    </Button>
-                )}
-                <Text>{this.props.status.loading ? 'Loading' : null}</Text>
-                <Text>{this.props.status.error ? this.props.status.error : null}</Text>
-                <Text>{this.props.status.success ? this.props.status.success : null}</Text>
-
-                <Text category="h4"> Their Activity</Text>
-                <ScrollView>
-                    {this.props.petition.selectedActivity && this.props.petition.selectedActivity[0]
-                        ? this.props.petition.selectedActivity.map((item, i) => (
-                              <EventCard
-                                  person={item.user}
-                                  petition={item.petition}
-                                  type={item.type}
-                                  date={item.date}
-                                  onPress={() =>
-                                      this.props.navigation.navigate('PetitionModal', {
-                                          petition: item.petition,
-                                      })
-                                  }
-                                  key={i}
-                              />
-                          ))
-                        : null}
-                </ScrollView>
+                        {this.renderActivity(true)}
+                    </Tab>
+                    <Tab
+                        title={(props) => (
+                            <Text style={{ ...props.style, fontSize: 20 }}>Signed</Text>
+                        )}
+                    >
+                        {this.renderActivity(false)}
+                    </Tab>
+                </TabView>
+                <UserFeedback {...this.props.status} />
             </View>
         );
     }

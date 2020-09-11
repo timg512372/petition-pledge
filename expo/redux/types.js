@@ -2,6 +2,8 @@
 export const LOGIN_USER_SUCCESS = 'login-user-success'; // Need to be replaced with status
 export const LOGIN_USER_ERROR = 'login-user-error'; // Need to be replaced with status
 export const LOGIN_USER = 'login-user';
+export const CACHE_USER = 'cache-user';
+
 export const UPDATE_USER = 'update-user';
 export const FORGOT_PASSWORD = 'forgot-password'; // Currently not used right now
 export const LOGOUT_USER = 'logout-user';
